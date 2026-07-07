@@ -72,6 +72,7 @@ const DocumentList = ({ parentDocumentId, level = 0 }: DocumentListProps) => {
             icon={FileIcon}
             documentIcon={document.icon}
             active={params.documentId == document._id}
+            isFavorite={document.isFavorite}
             level={level}
             onExpand={() => onExpand(document._id)}
             expanded={expanded[document._id]}

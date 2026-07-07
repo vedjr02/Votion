@@ -1,6 +1,6 @@
 "use client";
 
-import { ElementRef, useRef, useState } from "react";
+import { ElementRef, useEffect, useRef, useState } from "react";
 import { ImageIcon, Smile, X } from "lucide-react";
 import { useMutation } from "convex/react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -9,6 +9,7 @@ import { useCoverImage } from "@/hooks/use-cover-image";
 import { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
+import { PLACEHOLDER_TITLE } from "@/lib/templates";
 
 import { IconPicker } from "./icon-picker";
 
@@ -27,23 +28,47 @@ export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
 
   const coverImage = useCoverImage();
 
-  const enableInput = () => {
-    if (preview) return;
-
-    setIsEditing(true);
-    setTimeout(() => {
-      setValue(initialData.title);
+  const focusTitleInput = (selectAll = true) => {
+    requestAnimationFrame(() => {
       inputRef.current?.focus();
-    }, 0);
+      if (selectAll) {
+        inputRef.current?.select();
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      setValue(initialData.title);
+    }
+  }, [initialData.title, isEditing]);
+
+  useEffect(() => {
+    if (preview || initialData.title !== PLACEHOLDER_TITLE || initialData.isLocked) {
+      return;
+    }
+
+    setValue(PLACEHOLDER_TITLE);
+    setIsEditing(true);
+    focusTitleInput(true);
+  }, [initialData._id, initialData.title, preview]);
+
+  const enableInput = () => {
+    if (preview || initialData.isLocked) return;
+
+    setValue(initialData.title);
+    setIsEditing(true);
+    focusTitleInput(true);
   };
 
   const disableInput = () => setIsEditing(false);
 
-  const onInput = (value: string) => {
-    setValue(value);
+  const onInput = (nextValue: string) => {
+    if (initialData.isLocked) return;
+    setValue(nextValue);
     update({
       id: initialData._id,
-      title: value || "Untitled",
+      title: nextValue || PLACEHOLDER_TITLE,
     });
   };
 
@@ -55,6 +80,7 @@ export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
   };
 
   const onIconSelect = (icon: string) => {
+    if (initialData.isLocked) return;
     update({
       id: initialData._id,
       icon,

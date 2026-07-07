@@ -3,12 +3,15 @@
 import { useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
+import { Lock } from "lucide-react";
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface DocumentIdPageProps {
   params: {
@@ -29,6 +32,8 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
   const update = useMutation(api.documents.update);
 
   const onChange = (content: string) => {
+    if (document?.isLocked) return;
+
     update({
       id: params.documentId,
       content,
@@ -58,9 +63,27 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
   return (
     <div className="pb-40">
       <Cover url={document.coverImage} />
-      <div className="md:max-w-3xl lg:max-w-4xl mx-auto">
+      <Breadcrumbs document={document} />
+      {document.isLocked && (
+        <div className="mx-12 mt-3 flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 border rounded-md px-3 py-2 max-w-fit">
+          <Lock className="h-4 w-4" />
+          This page is locked. Unlock it from the menu to edit.
+        </div>
+      )}
+      <div
+        className={cn(
+          "mx-auto",
+          document.isFullWidth
+            ? "max-w-[1100px] px-8"
+            : "md:max-w-3xl lg:max-w-4xl"
+        )}
+      >
         <Toolbar initialData={document} />
-        <Editor onChange={onChange} initialContent={document.content} />
+        <Editor
+          onChange={onChange}
+          initialContent={document.content}
+          editable={!document.isLocked}
+        />
       </div>
     </div>
   );

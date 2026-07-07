@@ -2,6 +2,7 @@
 
 import {
   ChevronsLeft,
+  LayoutTemplate,
   MenuIcon,
   Plus,
   PlusCircle,
@@ -17,6 +18,7 @@ import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { api } from "@/convex/_generated/api";
+import { PLACEHOLDER_TITLE } from "@/lib/templates";
 import {
   Popover,
   PopoverTrigger,
@@ -28,8 +30,10 @@ import { useSettings } from "@/hooks/use-settings";
 import { UserItem } from "./user-item";
 import Item from "./item";
 import DocumentList from "./document-list";
-import { TrashBox } from "./trash-box";
+import { FavoritesList } from "./favorites-list";
+import { RecentList } from "./recent-list";
 import { Navbar } from "./navbar";
+import { TrashBox } from "./trash-box";
 
 export const Navigation = () => {
   const router = useRouter();
@@ -122,7 +126,7 @@ export const Navigation = () => {
   };
 
   const handleCreate = () => {
-    const promise = create({ title: "Untitled" }).then((documentId) =>
+    const promise = create({ title: PLACEHOLDER_TITLE }).then((documentId) =>
       router.push(`/documents/${documentId}`)
     );
 
@@ -156,10 +160,21 @@ export const Navigation = () => {
         <div>
           <UserItem />
           <Item label="Search" icon={Search} isSearch onClick={search.onOpen} />
+          <Item
+            label="Templates"
+            icon={LayoutTemplate}
+            active={pathname === "/templates"}
+            onClick={() => router.push("/templates")}
+          />
           <Item label="Settings" icon={Settings} onClick={settings.onOpen} />
           <Item onClick={handleCreate} label="New page" icon={PlusCircle} />
         </div>
         <div className="mt-4">
+          <FavoritesList />
+          <RecentList />
+          <p className="text-[11px] font-medium text-muted-foreground px-3 mt-3 mb-1">
+            Private
+          </p>
           <DocumentList />
           <Item onClick={handleCreate} icon={Plus} label="Add a page" />
           <Popover>

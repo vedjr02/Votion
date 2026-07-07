@@ -5,11 +5,14 @@ import { redirect } from "next/navigation";
 
 import { Spinner } from "@/components/spinner";
 import { SearchCommand } from "@/components/search-command";
+import { PageLinkPicker } from "@/components/page-link-picker";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 import { Navigation } from "./_components/navigation";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useConvexAuth();
+  useKeyboardShortcuts();
 
   if (isLoading) {
     return (
@@ -28,6 +31,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
       <Navigation />
       <main className="flex-1 h-full overflow-y-auto">
         <SearchCommand />
+        <PageLinkPicker />
         {children}
       </main>
     </div>

@@ -6,6 +6,7 @@ import {
   LucideIcon,
   MoreHorizontal,
   Plus,
+  Star,
   Trash,
 } from "lucide-react";
 import { useMutation } from "convex/react";
@@ -17,6 +18,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
+import { PLACEHOLDER_TITLE } from "@/lib/templates";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -31,6 +33,7 @@ interface ItemProps {
   active?: boolean;
   expanded?: boolean;
   isSearch?: boolean;
+  isFavorite?: boolean;
   level?: number;
   onExpand?: () => void;
   label: string;
@@ -49,11 +52,13 @@ const Item = ({
   level = 0,
   onExpand,
   expanded,
+  isFavorite,
 }: ItemProps) => {
   const { user } = useUser();
   const router = useRouter();
   const create = useMutation(api.documents.create);
   const archive = useMutation(api.documents.archive);
+  const update = useMutation(api.documents.update);
 
   const onArchive = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
@@ -77,7 +82,7 @@ const Item = ({
   const onCreate = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     event.stopPropagation();
     if (!id) return;
-    const promise = create({ title: "Untitled", parentDocument: id }).then(
+    const promise = create({ title: PLACEHOLDER_TITLE, parentDocument: id }).then(
       (documentId) => {
         if (!expanded) {
           onExpand?.();
@@ -90,6 +95,24 @@ const Item = ({
       loading: "Creating a new note...",
       success: "New note created!",
       error: "Failed to create a new note.",
+    });
+  };
+
+  const onToggleFavorite = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    event.stopPropagation();
+    if (!id) return;
+
+    const promise = update({
+      id,
+      isFavorite: !isFavorite,
+    });
+
+    toast.promise(promise, {
+      loading: "Updating favorite...",
+      success: isFavorite ? "Removed from favorites" : "Added to favorites",
+      error: "Failed to update favorite.",
     });
   };
 
@@ -128,7 +151,21 @@ const Item = ({
         </kbd>
       )}
       {!!id && (
-        <div className="ml-auto flex items-center gap-x-2">
+        <div className="ml-auto flex items-center gap-x-1">
+          <div
+            role="button"
+            onClick={onToggleFavorite}
+            className="opacity-0 group-hover:opacity-100 rounded-sm p-1 hover:bg-neutral-300 dark:hover:bg-neutral-600"
+          >
+            <Star
+              className={cn(
+                "h-3.5 w-3.5",
+                isFavorite
+                  ? "fill-yellow-400 text-yellow-400 opacity-100"
+                  : "text-muted-foreground"
+              )}
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger onClick={(e) => e.stopPropagation()} asChild>
               <div

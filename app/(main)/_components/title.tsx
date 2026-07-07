@@ -5,6 +5,7 @@ import { useMutation } from "convex/react";
 
 import { Doc } from "@/convex/_generated/dataModel";
 import { api } from "@/convex/_generated/api";
+import { PLACEHOLDER_TITLE } from "@/lib/templates";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +18,7 @@ export const Title = ({ initialData }: TitleProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const update = useMutation(api.documents.update);
 
-  const [title, setTitle] = useState(initialData.title || "Untitled");
+  const [title, setTitle] = useState(initialData.title || PLACEHOLDER_TITLE);
   const [isEditing, setIsEditing] = useState(false);
 
   const enableInput = () => {
@@ -25,7 +26,7 @@ export const Title = ({ initialData }: TitleProps) => {
     setIsEditing(true);
     setTimeout(() => {
       inputRef.current?.focus();
-      inputRef.current?.setSelectionRange(0, inputRef.current.value.length);
+      inputRef.current?.select();
     }, 0);
   };
 
@@ -37,7 +38,7 @@ export const Title = ({ initialData }: TitleProps) => {
     setTitle(event.target.value);
     update({
       id: initialData._id,
-      title: event.target.value || "Untitled",
+      title: event.target.value || PLACEHOLDER_TITLE,
     });
   };
 

@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: process.env.CLERK_JWT_ISSUER_DOMAIN,
+      domain: "https://deep-anemone-59.clerk.accounts.dev",
       applicationID: "convex",
     },
   ],

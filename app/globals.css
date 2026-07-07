@@ -79,3 +79,41 @@ body,
     @apply bg-background text-foreground;
   }
 }
+
+/* Notion-style editor enhancements */
+.votion-editor .bn-editor {
+  padding-left: 54px;
+  padding-right: 54px;
+}
+
+.votion-editor .bn-block-group .bn-block-outer:not([data-prev-depth-change="-2"]):before {
+  border-radius: 4px;
+}
+
+.votion-editor [data-background-color="gray"] {
+  border-left: 3px solid hsl(var(--border));
+  border-radius: 4px;
+  padding-left: 0.25rem;
+}
+
+.votion-editor [data-background-color="blue"],
+.votion-editor [data-background-color="yellow"],
+.votion-editor [data-background-color="green"],
+.votion-editor [data-background-color="red"] {
+  border-radius: 6px;
+  padding: 0.15rem 0.35rem;
+}
+
+.votion-editor .votion-checklist-item {
+  align-items: flex-start;
+}
+
+.votion-editor a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.votion-editor a:hover {
+  opacity: 0.85;
+}
