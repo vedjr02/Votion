@@ -151,6 +151,68 @@ body,
   align-items: flex-start;
 }
 
+/* Toggle blocks */
+.votion-toggle {
+  width: 100%;
+}
+
+.votion-toggle-chevron {
+  border: none;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  padding: 0.1rem 0.15rem 0 0;
+  border-radius: 0.2rem;
+}
+
+.votion-toggle-chevron:hover:not(:disabled) {
+  background: hsl(var(--muted) / 0.45);
+}
+
+.votion-toggle-chevron:disabled {
+  cursor: default;
+}
+
+.votion-editor .bn-block:has(> [data-content-type="votionToggle"][data-open="false"]) > .bn-block-group {
+  display: none;
+}
+
+/* Code blocks */
+.votion-code-block {
+  margin: 0.35rem 0 0.75rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 3px;
+  background: rgba(55, 53, 47, 0.06);
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  tab-size: 2;
+}
+
+.dark .votion-code-block {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.votion-code-block code {
+  display: block;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Small text */
+.votion-small-text {
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .votion-small-text {
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .votion-editor a {
   color: #2383e2;
   text-decoration: none;
@@ -194,6 +256,19 @@ body,
 .votion-editor .blockContent[data-content-type="bulletListItem"].isEmpty:not(.hasAnchor) .inlineContent:before,
 .votion-editor .blockContent[data-content-type="numberedListItem"].isEmpty:not(.hasAnchor) .inlineContent:before {
   content: "List";
+}
+
+.votion-editor .blockContent[data-content-type="votionToggle"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Toggle heading";
+}
+
+.votion-editor .blockContent[data-content-type="votionCode"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Code";
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.votion-editor .blockContent[data-content-type="votionSmallText"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Small text";
 }
 
 .votion-editor .blockContent[data-content-type="paragraph"][data-background-color="gray"].isEmpty:not(.hasAnchor) .inlineContent:before {

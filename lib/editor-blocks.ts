@@ -61,3 +61,38 @@ export const emptyCheckListItems = (count = 3) =>
   Array.from({ length: count }, () =>
     emptyBlock("checkListItem", { checked: false })
   );
+
+const defaultBlockProps = {
+  textAlignment: "left" as const,
+  backgroundColor: "default" as const,
+  textColor: "default" as const,
+};
+
+export const emptyToggleBlock = (
+  childCount = 1
+): PartialBlock<VotionBlockSchema> => ({
+  type: "votionToggle",
+  props: {
+    ...defaultBlockProps,
+    open: true,
+  },
+  content: [],
+  children: Array.from({ length: childCount }, () => emptyBlock("paragraph")),
+});
+
+export const emptyCodeBlock = (): PartialBlock<VotionBlockSchema> => ({
+  type: "votionCode",
+  props: {
+    ...defaultBlockProps,
+    language: "plain",
+  },
+  content: [],
+  children: [],
+});
+
+export const emptySmallTextBlock = (): PartialBlock<VotionBlockSchema> => ({
+  type: "votionSmallText",
+  props: defaultBlockProps,
+  content: [],
+  children: [],
+});

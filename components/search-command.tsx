@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { File } from "lucide-react";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
@@ -16,12 +16,17 @@ import {
 } from "@/components/ui/command";
 import { useSearch } from "@/hooks/use-search";
 import { api } from "@/convex/_generated/api";
+import {
+  getContentSnippet,
+  getDocumentSearchValue,
+} from "@/lib/search-documents";
 
 export const SearchCommand = () => {
   const { user } = useUser();
   const router = useRouter();
   const documents = useQuery(api.documents.getSearch);
   const [isMounted, setIsMounted] = useState(false);
+  const [query, setQuery] = useState("");
 
   const toggle = useSearch((store) => store.toggle);
   const isOpen = useSearch((store) => store.isOpen);
@@ -43,9 +48,21 @@ export const SearchCommand = () => {
     return () => document.removeEventListener("keydown", down);
   }, [toggle]);
 
+  const filteredDocuments = useMemo(() => {
+    if (!documents) return [];
+
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return documents;
+
+    return documents.filter((document) =>
+      getDocumentSearchValue(document).includes(normalizedQuery)
+    );
+  }, [documents, query]);
+
   const onSelect = (id: string) => {
     router.push(`/documents/${id}`);
     onClose();
+    setQuery("");
   };
 
   if (!isMounted) {
@@ -53,26 +70,48 @@ export const SearchCommand = () => {
   }
 
   return (
-    <CommandDialog open={isOpen} onOpenChange={onClose}>
-      <CommandInput placeholder={`Search ${user?.fullName}'s Votion...`} />
+    <CommandDialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose();
+          setQuery("");
+        }
+      }}
+    >
+      <CommandInput
+        placeholder={`Search ${user?.fullName}'s Votion...`}
+        value={query}
+        onValueChange={setQuery}
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
         <CommandGroup heading="Documents">
-          {documents?.map((document) => (
-            <CommandItem
-              key={document._id}
-              value={`${document._id}-${document.title}`}
-              title={document.title}
-              onSelect={() => onSelect(document._id)}
-            >
-              {document.icon ? (
-                <p className="mr-2 text-[18px]">{document.icon}</p>
-              ) : (
-                <File className="mr-2 h-4 w-4" />
-              )}
-              <span>{document.title}</span>
-            </CommandItem>
-          ))}
+          {filteredDocuments.map((document) => {
+            const snippet = getContentSnippet(document.content, query);
+
+            return (
+              <CommandItem
+                key={document._id}
+                value={getDocumentSearchValue(document)}
+                onSelect={() => onSelect(document._id)}
+              >
+                {document.icon ? (
+                  <p className="mr-2 text-[18px]">{document.icon}</p>
+                ) : (
+                  <File className="mr-2 h-4 w-4 shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <p className="truncate">{document.title}</p>
+                  {snippet && (
+                    <p className="truncate text-xs text-muted-foreground">
+                      {snippet}
+                    </p>
+                  )}
+                </div>
+              </CommandItem>
+            );
+          })}
         </CommandGroup>
       </CommandList>
     </CommandDialog>
