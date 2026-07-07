@@ -1,4 +1,9 @@
 import { inlineToPlainText, TocBlock } from "@/lib/toc-utils";
+import {
+  getTableHeaders,
+  getTableRows,
+  normalizeTableData,
+} from "@/lib/blocks/votion-block-utils";
 
 export type PageStats = {
   words: number;
@@ -30,16 +35,13 @@ const walkBlocks = (
 
     if (block.type === "votionTable" && block.props && "data" in block.props) {
       try {
-        const data = JSON.parse(String(block.props.data)) as {
-          headers?: string[];
-          rows?: string[][];
-        };
+        const data = normalizeTableData(String(block.props.data));
 
-        for (const header of data.headers ?? []) {
+        for (const header of getTableHeaders(data)) {
           if (header.trim()) onText(header);
         }
 
-        for (const row of data.rows ?? []) {
+        for (const row of getTableRows(data)) {
           for (const cell of row) {
             if (cell.trim()) onText(cell);
           }

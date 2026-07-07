@@ -1,4 +1,9 @@
 import { collectHeadings, TocBlock } from "@/lib/toc-utils";
+import {
+  getTableHeaders,
+  getTableRows,
+  normalizeTableData,
+} from "@/lib/blocks/votion-block-utils";
 
 type BlockContent = {
   type?: string;
@@ -49,18 +54,14 @@ const tableToMarkdown = (dataProp?: string) => {
   if (!dataProp) return "";
 
   try {
-    const data = JSON.parse(dataProp) as {
-      headers?: string[];
-      rows?: string[][];
-    };
-
-    const headers = data.headers ?? [];
-    const rows = data.rows ?? [];
+    const data = normalizeTableData(dataProp);
+    const headers = getTableHeaders(data);
+    const rows = getTableRows(data);
     if (headers.length === 0) return "";
 
     const headerRow = `| ${headers.join(" | ")} |`;
     const separator = `| ${headers.map(() => "---").join(" | ")} |`;
-    const body = rows.map((row) => `| ${headers.map((_, i) => row[i] ?? "").join(" | ")} |`);
+    const body = rows.map((row) => `| ${row.join(" | ")} |`);
 
     return [headerRow, separator, ...body, ""].join("\n");
   } catch {

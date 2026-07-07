@@ -296,7 +296,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     aliases: ["table", "grid", "database", "rows"],
     group: "Advanced blocks",
     icon: <Table size={18} />,
-    hint: "Insert an editable table",
+    hint: "Insert an editable table or board",
     execute: (editor) =>
       insertOrUpdateBlock(editor, defaultTableLayout()),
   },

@@ -1,4 +1,9 @@
 import { collectHeadings, inlineToPlainText, TocBlock } from "@/lib/toc-utils";
+import {
+  getTableHeaders,
+  getTableRows,
+  normalizeTableData,
+} from "@/lib/blocks/votion-block-utils";
 
 type BlockContent = {
   type?: string;
@@ -54,21 +59,17 @@ const tableToHtml = (dataProp?: string) => {
   if (!dataProp) return "";
 
   try {
-    const data = JSON.parse(dataProp) as {
-      headers?: string[];
-      rows?: string[][];
-    };
-
-    const headers = data.headers ?? [];
-    const rows = data.rows ?? [];
+    const data = normalizeTableData(dataProp);
+    const headers = getTableHeaders(data);
+    const rows = getTableRows(data);
     if (headers.length === 0) return "";
 
     const headerCells = headers.map((header) => `<th>${escapeHtml(header)}</th>`).join("");
     const bodyRows = rows
       .map(
         (row) =>
-          `<tr>${headers
-            .map((_, index) => `<td>${escapeHtml(row[index] ?? "")}</td>`)
+          `<tr>${row
+            .map((cell) => `<td>${escapeHtml(cell)}</td>`)
             .join("")}</tr>`
       )
       .join("");

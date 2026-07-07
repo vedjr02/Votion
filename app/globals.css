@@ -466,6 +466,145 @@ body,
   background: hsl(var(--muted));
 }
 
+.votion-table-view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+
+.votion-table-view-tabs button {
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.25);
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.votion-table-view-tabs button.active {
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border-color: hsl(var(--foreground));
+}
+
+.votion-table-group-by,
+.votion-table-column-type,
+.votion-table-select,
+.votion-table-input {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.3rem;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 0.75rem;
+  padding: 0.15rem 0.35rem;
+}
+
+.votion-table-header-name {
+  margin-bottom: 0.15rem;
+}
+
+.votion-table-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: hsl(var(--foreground));
+}
+
+.votion-board {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+}
+
+.votion-board-column {
+  min-width: 240px;
+  max-width: 280px;
+  background: hsl(var(--muted) / 0.25);
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 0.65rem;
+}
+
+.votion-board-column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 0.65rem;
+}
+
+.votion-board-count {
+  font-size: 0.7rem;
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  padding: 0.05rem 0.45rem;
+}
+
+.votion-board-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 2rem;
+}
+
+.votion-board-card {
+  background: hsl(var(--background));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.45rem;
+  padding: 0.55rem 0.65rem;
+}
+
+.votion-board-card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.45rem;
+}
+
+.votion-board-card-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.votion-board-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-board-add-card {
+  width: 100%;
+  margin-top: 0.55rem;
+  border: 1px dashed hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 0.35rem;
+  cursor: pointer;
+}
+
+.votion-board-add-card:hover {
+  background: hsl(var(--muted) / 0.35);
+  color: hsl(var(--foreground));
+}
+
+.votion-board-empty {
+  font-size: 0.875rem;
+  color: hsl(var(--muted-foreground));
+  padding: 0.75rem 0;
+}
+
 /* Editable column layout */
 .votion-column-list-shell {
   height: 0;
@@ -645,4 +784,29 @@ body,
   display: flex;
   align-items: center;
   color: hsl(var(--muted-foreground));
+}
+
+@media print {
+  aside,
+  nav,
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  main {
+    overflow: visible !important;
+    height: auto !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .votion-table-toolbar,
+  .votion-table-view-tabs,
+  .votion-table-actions-col,
+  .votion-board-add-card {
+    display: none !important;
+  }
 }

@@ -8,6 +8,7 @@ import { Lock } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { Backlinks } from "@/components/backlinks";
+import { PageComments } from "@/components/page-comments";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
 import { Breadcrumbs } from "@/components/breadcrumbs";
@@ -93,6 +94,7 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
           />
         </div>
         <Backlinks documentId={params.documentId} />
+        <PageComments documentId={params.documentId} isLocked={document.isLocked} />
       </div>
     </div>
   );

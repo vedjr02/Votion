@@ -33,6 +33,12 @@ export const useKeyboardShortcuts = () => {
           success: "New page created!",
           error: "Failed to create page.",
         });
+        return;
+      }
+
+      if (isMeta && event.key.toLowerCase() === "p") {
+        event.preventDefault();
+        window.print();
       }
     };
 

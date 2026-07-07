@@ -27,4 +27,13 @@ export default defineSchema({
     content: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_document", ["documentId", "createdAt"]),
+  comments: defineTable({
+    documentId: v.id("documents"),
+    userId: v.string(),
+    userName: v.string(),
+    userImageUrl: v.optional(v.string()),
+    body: v.string(),
+    createdAt: v.number(),
+    isResolved: v.optional(v.boolean()),
+  }).index("by_document", ["documentId", "createdAt"]),
 });

@@ -9,6 +9,7 @@ const shortcuts = [
   { keys: "⌘ K", description: "Search pages" },
   { keys: "⌘ N", description: "Create a new page" },
   { keys: "⌘ ⇧ K", description: "Open templates" },
+  { keys: "⌘ P", description: "Print current page" },
   { keys: "/", description: "Open block menu in editor" },
   { keys: "Enter", description: "Save page title while editing" },
 ];

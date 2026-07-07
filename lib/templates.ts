@@ -16,6 +16,7 @@ import {
   quote,
   section,
   table,
+  databaseTable,
   type TemplateContent,
 } from "@/lib/template-blocks";
 import {
@@ -523,7 +524,7 @@ const taskDatabaseContent: TemplateContent = [
     "Your team task board — filter by status or owner. Add rows with + Row on the table."
   ),
   h2("All tasks"),
-  table(
+  databaseTable(
     ["Name", "Status", "Owner", "Due date", "Priority"],
     [
       ["Design homepage", "In progress", "Sam", "Friday", "High"],

@@ -19,6 +19,7 @@ import {
   Maximize2,
   Minimize2,
   MoreHorizontal,
+  Printer,
   Star,
   Trash,
   Unlock,
@@ -186,6 +187,10 @@ export const Menu = ({ document }: MenuProps) => {
     window.open(pageUrl, "_blank", "noopener,noreferrer");
   };
 
+  const onPrint = () => {
+    window.print();
+  };
+
   const onOpenVersionHistory = () => {
     useVersionHistory.getState().onOpen(document._id);
   };
@@ -234,6 +239,10 @@ export const Menu = ({ document }: MenuProps) => {
         <DropdownMenuItem onClick={onOpenInNewTab}>
           <ExternalLink className="h-4 w-4 mr-2" />
           Open in new tab
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onPrint}>
+          <Printer className="h-4 w-4 mr-2" />
+          Print
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenImportMarkdown}>
           <FileUp className="h-4 w-4 mr-2" />
