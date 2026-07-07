@@ -217,13 +217,15 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Minus size={18} />,
     hint: "Visually divide blocks",
     execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        blockWithText("paragraph", "────────────", {
-          textAlignment: "center",
+      insertOrUpdateBlock(editor, {
+        type: "votionDivider",
+        props: {
+          textAlignment: "left",
           backgroundColor: "default",
-        })
-      ),
+          textColor: "default",
+        },
+        children: [],
+      }),
   },
   {
     name: "Code",

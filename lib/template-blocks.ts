@@ -72,23 +72,43 @@ export const checkList = (): TemplateBlock =>
 
 export const checkLists = (count: number) => emptyCheckListItems(count);
 
+const calloutIcons: Record<
+  "blue" | "yellow" | "green" | "red" | "gray",
+  string
+> = {
+  blue: "💡",
+  yellow: "⚠️",
+  green: "✅",
+  red: "🚨",
+  gray: "💬",
+};
+
 export const callout = (
   color: "blue" | "yellow" | "green" | "red" | "gray",
   value = ""
-): TemplateBlock =>
-  value
-    ? blockWithText("paragraph", value, { backgroundColor: color })
-    : emptyBlock("paragraph", { backgroundColor: color });
+): TemplateBlock => {
+  if (!value) {
+    return emptyBlock("paragraph", { backgroundColor: color });
+  }
+
+  const icon = calloutIcons[color];
+  return blockWithText("paragraph", `${icon} ${value}`, {
+    backgroundColor: color,
+  });
+};
 
 export const intro = (value: string): TemplateBlock => callout("blue", value);
 
-export const quote = (value = ""): TemplateBlock => callout("gray", value);
+export const quote = (value = ""): TemplateBlock =>
+  value
+    ? blockWithText("paragraph", value, { backgroundColor: "gray" })
+    : emptyBlock("paragraph", { backgroundColor: "gray" });
 
-export const divider = (): TemplateBlock =>
-  blockWithText("paragraph", "────────────", {
-    textAlignment: "center",
-    backgroundColor: "default",
-  });
+export const divider = (): TemplateBlock => ({
+  type: "votionDivider",
+  props: baseProps,
+  children: [],
+});
 
 export const tableBlock = (data: TableData): TemplateBlock => ({
   type: "votionTable",

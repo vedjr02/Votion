@@ -21,7 +21,12 @@ export const RecentList = () => {
       <p className="text-[11px] font-medium text-muted-foreground px-3 mb-1">
         Recent
       </p>
-      {recent.map((document) => (
+      {recent
+        .filter(
+          (document, index, list) =>
+            list.findIndex((item) => item._id === document._id) === index
+        )
+        .map((document) => (
         <Item
           key={document._id}
           id={document._id}

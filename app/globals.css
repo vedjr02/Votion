@@ -84,24 +84,67 @@ body,
 .votion-editor .bn-editor {
   padding-left: 54px;
   padding-right: 54px;
+  font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji";
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 .votion-editor .bn-block-group .bn-block-outer:not([data-prev-depth-change="-2"]):before {
   border-radius: 4px;
 }
 
-.votion-editor [data-background-color="gray"] {
-  border-left: 3px solid hsl(var(--border));
-  border-radius: 4px;
-  padding-left: 0.25rem;
-}
-
+/* Notion callouts — same subtle background for every color */
 .votion-editor [data-background-color="blue"],
 .votion-editor [data-background-color="yellow"],
 .votion-editor [data-background-color="green"],
-.votion-editor [data-background-color="red"] {
-  border-radius: 6px;
-  padding: 0.15rem 0.35rem;
+.votion-editor [data-background-color="red"],
+.votion-editor [data-background-color="orange"],
+.votion-editor [data-background-color="purple"],
+.votion-editor [data-background-color="pink"],
+.votion-editor [data-background-color="brown"] {
+  background-color: rgba(55, 53, 47, 0.06) !important;
+  border-radius: 3px;
+  padding: 1rem 0.875rem !important;
+  color: inherit;
+}
+
+.dark .votion-editor [data-background-color="blue"],
+.dark .votion-editor [data-background-color="yellow"],
+.dark .votion-editor [data-background-color="green"],
+.dark .votion-editor [data-background-color="red"],
+.dark .votion-editor [data-background-color="orange"],
+.dark .votion-editor [data-background-color="purple"],
+.dark .votion-editor [data-background-color="pink"],
+.dark .votion-editor [data-background-color="brown"] {
+  background-color: rgba(255, 255, 255, 0.055) !important;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Notion quote blocks */
+.votion-editor [data-background-color="gray"] {
+  background-color: transparent !important;
+  border-left: 3px solid rgba(55, 53, 47, 0.16);
+  border-radius: 0;
+  padding: 0.15rem 0 0.15rem 0.875rem !important;
+  color: inherit;
+}
+
+.dark .votion-editor [data-background-color="gray"] {
+  border-left-color: rgba(255, 255, 255, 0.13);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Notion divider */
+.votion-editor .votion-divider-block {
+  border: none;
+  height: 1px;
+  margin: 0.35rem 0 0.5rem;
+  background: rgba(55, 53, 47, 0.16);
+}
+
+.dark .votion-editor .votion-divider-block {
+  background: rgba(255, 255, 255, 0.13);
 }
 
 .votion-editor .votion-checklist-item {
@@ -109,13 +152,19 @@ body,
 }
 
 .votion-editor a {
-  color: hsl(var(--primary));
-  text-decoration: underline;
+  color: #2383e2;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(35, 131, 226, 0.35);
   text-underline-offset: 2px;
 }
 
+.dark .votion-editor a {
+  color: #70b8ff;
+  border-bottom-color: rgba(112, 184, 255, 0.35);
+}
+
 .votion-editor a:hover {
-  opacity: 0.85;
+  opacity: 0.92;
 }
 
 /* Notion-style placeholders: light hint when unfocused, blank when typing */
