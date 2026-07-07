@@ -7,14 +7,30 @@ export type TableColumn = {
   options?: string[];
 };
 
-export type TableView = "table" | "board";
+export type TableView = "table" | "board" | "gallery";
+
+export type DatabaseViewTab = {
+  id: string;
+  label: string;
+  icon?: string;
+  view: TableView;
+  filterPreset?: "all" | "week" | "month" | "streak";
+};
 
 export type TableData = {
   columns: TableColumn[];
   rows: Record<string, string>[];
   view: TableView;
   groupByColumnId?: string;
+  galleryCardColumnId?: string;
   filterText?: string;
+  sortColumnId?: string;
+  sortDirection?: "asc" | "desc";
+  activeViewTabId?: string;
+  viewTabs?: DatabaseViewTab[];
+  showSearch?: boolean;
+  showFilterPanel?: boolean;
+  showSortPanel?: boolean;
 };
 
 type LegacyTableData = {
@@ -24,8 +40,28 @@ type LegacyTableData = {
 
 const defaultSelectOptions = ["Not started", "In progress", "Done", "Blocked"];
 
-const inferColumnType = (name: string): TableColumn => {
+const isCheckboxTrue = (value: string) =>
+  value === "true" ||
+  value === "1" ||
+  value.toLowerCase() === "yes" ||
+  value === "✓" ||
+  value === "✔";
+
+const inferColumnType = (name: string, index: number): TableColumn => {
   const lower = name.toLowerCase();
+
+  if (
+    index > 0 &&
+    (/^[\p{Extended_Pictographic}]/u.test(name.trim()) ||
+      /^(mon|tue|wed|thu|fri|sat|sun)$/i.test(lower) ||
+      lower.includes("habit") ||
+      lower.includes("sleep") ||
+      lower.includes("journal") ||
+      lower.includes("meditat") ||
+      lower.includes("running"))
+  ) {
+    return { id: "", name, type: "checkbox" };
+  }
 
   if (lower === "status") {
     return {
@@ -36,7 +72,7 @@ const inferColumnType = (name: string): TableColumn => {
     };
   }
 
-  if (lower.includes("due") || lower.includes("date")) {
+  if (lower.includes("due") || lower.includes("date") || lower === "day") {
     return { id: "", name, type: "date" };
   }
 
@@ -115,6 +151,9 @@ export const normalizeTableData = (
     }));
 
     const selectColumn = columns.find((column) => column.type === "select");
+    const dateColumn =
+      columns.find((column) => column.name.toLowerCase() === "date") ??
+      columns.find((column) => column.type === "date");
 
     return {
       columns,
@@ -122,13 +161,22 @@ export const normalizeTableData = (
       view: data.view ?? "table",
       groupByColumnId:
         data.groupByColumnId ?? selectColumn?.id ?? columns[0]?.id,
+      galleryCardColumnId:
+        data.galleryCardColumnId ?? dateColumn?.id ?? columns[0]?.id,
       filterText: data.filterText ?? "",
+      sortColumnId: data.sortColumnId,
+      sortDirection: data.sortDirection ?? "asc",
+      activeViewTabId: data.activeViewTabId,
+      viewTabs: data.viewTabs,
+      showSearch: data.showSearch ?? false,
+      showFilterPanel: data.showFilterPanel ?? false,
+      showSortPanel: data.showSortPanel ?? false,
     };
   }
 
   if (Array.isArray(data.headers) && Array.isArray(data.rows)) {
     const columns = data.headers.map((name, index) => {
-      const inferred = inferColumnType(name);
+      const inferred = inferColumnType(name, index);
       return {
         ...inferred,
         id: `col-${index + 1}`,
@@ -137,20 +185,61 @@ export const normalizeTableData = (
 
     const rows = data.rows.map((row) =>
       Object.fromEntries(
-        columns.map((column, index) => [column.id, row[index] ?? ""])
+        columns.map((column, index) => {
+          const raw = row[index] ?? "";
+          if (column.type === "checkbox") {
+            return [column.id, isCheckboxTrue(raw) ? "true" : "false"];
+          }
+          return [column.id, raw];
+        })
       )
     );
 
     const statusColumn = columns.find(
       (column) => column.name.toLowerCase() === "status"
     );
+    const dateColumn =
+      columns.find((column) => column.name.toLowerCase() === "date") ??
+      columns.find((column) => column.type === "date");
+    const checkboxCount = columns.filter((column) => column.type === "checkbox").length;
+
+    const defaultView =
+      checkboxCount >= 3 && dateColumn ? "gallery" : statusColumn ? "board" : "table";
 
     return {
       columns,
       rows,
-      view: statusColumn ? "board" : "table",
+      view: defaultView,
       groupByColumnId: statusColumn?.id ?? columns[0]?.id,
+      galleryCardColumnId: dateColumn?.id ?? columns[0]?.id,
       filterText: "",
+      activeViewTabId: defaultView === "gallery" ? "week" : undefined,
+      viewTabs:
+        defaultView === "gallery"
+          ? [
+              {
+                id: "week",
+                label: "This week",
+                icon: "📅",
+                view: "gallery",
+                filterPreset: "week",
+              },
+              {
+                id: "month",
+                label: "This month",
+                icon: "🗓️",
+                view: "gallery",
+                filterPreset: "month",
+              },
+              {
+                id: "streak",
+                label: "Streak",
+                icon: "🔥",
+                view: "gallery",
+                filterPreset: "streak",
+              },
+            ]
+          : undefined,
     };
   }
 
@@ -174,6 +263,53 @@ export const kanbanTable = (
     ...data,
     view: "board",
     groupByColumnId: groupColumn?.id ?? data.columns[0]?.id,
+  };
+};
+
+export const galleryTable = (
+  headers: string[],
+  rows: string[][],
+  options?: {
+    viewTabs?: DatabaseViewTab[];
+    activeViewTabId?: string;
+    galleryCardColumnId?: string;
+  }
+): TableData => {
+  const data = normalizeTableData({ headers, rows });
+  const dateColumn =
+    data.columns.find((column) => column.name.toLowerCase() === "date") ??
+    data.columns[0];
+
+  return {
+    ...data,
+    view: "gallery",
+    galleryCardColumnId: options?.galleryCardColumnId ?? dateColumn?.id,
+    activeViewTabId: options?.activeViewTabId ?? "week",
+    viewTabs:
+      options?.viewTabs ??
+      [
+        {
+          id: "week",
+          label: "This week",
+          icon: "📅",
+          view: "gallery",
+          filterPreset: "week",
+        },
+        {
+          id: "month",
+          label: "This month",
+          icon: "🗓️",
+          view: "gallery",
+          filterPreset: "month",
+        },
+        {
+          id: "streak",
+          label: "Streak",
+          icon: "🔥",
+          view: "gallery",
+          filterPreset: "streak",
+        },
+      ],
   };
 };
 

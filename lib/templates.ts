@@ -17,6 +17,7 @@ import {
   section,
   table,
   databaseTable,
+  galleryDatabase,
   type TemplateContent,
 } from "@/lib/template-blocks";
 import {
@@ -390,25 +391,30 @@ const studyPlannerContent: TemplateContent = [
 
 const habitTrackerContent: TemplateContent = [
   intro(
-    "Pick 3 habits max. Track daily, then reflect every Sunday — consistency beats perfection."
+    "This habit tracker uses gallery cards for each day. Tap the habit buttons to check them off — just like Notion."
   ),
-  h2("Habits I'm building"),
-  table(
-    ["Habit", "Why it matters", "Trigger / cue"],
-    [
-      ["Morning workout", "Energy & focus", "After coffee"],
-      ["Read 20 pages", "Learning habit", "Before bed"],
-      ["No phone first hour", "Deep work", "Wake up alarm"],
-    ]
+  callout(
+    "blue",
+    "Switch between This week, This month, and Streak using the view tabs. Add more habits with New → New checkbox."
   ),
-  divider(),
-  h2("This week's tracker"),
-  table(
-    ["Habit", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+  h2("Habits"),
+  galleryDatabase(
     [
-      ["Morning workout", "✓", "✓", "", "✓", "", "✓", ""],
-      ["Read 20 pages", "✓", "", "✓", "✓", "✓", "", "✓"],
-      ["No phone first hour", "", "✓", "✓", "", "✓", "✓", ""],
+      "Date",
+      "✍️ Journaling",
+      "🏃 Running",
+      "😴 8hrs of sleep",
+      "🧘 Meditation",
+    ],
+    [
+      ["March 20, 2026", "true", "true", "false", "true"],
+      ["March 21, 2026", "true", "false", "true", "false"],
+      ["March 22, 2026", "false", "true", "true", "true"],
+      ["March 23, 2026", "true", "true", "true", "false"],
+      ["March 24, 2026", "false", "false", "true", "true"],
+      ["March 25, 2026", "true", "true", "false", "true"],
+      ["March 26, 2026", "true", "false", "true", "true"],
+      ["March 27, 2026", "false", "true", "true", "false"],
     ]
   ),
   divider(),
@@ -705,7 +711,7 @@ export const documentTemplates: DocumentTemplate[] = [
     icon: "🌱",
     category: "personal",
     description:
-      "Three-habit system with a Mon–Sun grid and weekly reflection.",
+      "Notion-style daily habit cards with checkbox buttons, view tabs, and streak filter.",
     content: habitTrackerContent,
   },
   {

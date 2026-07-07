@@ -2,6 +2,7 @@ import { PartialBlock } from "@blocknote/core";
 
 import type { VotionBlockSchema } from "@/lib/block-schema";
 import {
+  galleryTable,
   kanbanTable,
   stringifyJsonProp,
   tableData,
@@ -128,6 +129,11 @@ export const databaseTable = (
   groupByHeader = "Status"
 ): TemplateBlock =>
   tableBlock(kanbanTable(headers, rows, groupByHeader));
+
+export const galleryDatabase = (
+  headers: string[],
+  rows: string[][] = []
+): TemplateBlock => tableBlock(galleryTable(headers, rows));
 
 export const tableWithEmptyRows = (
   headers: string[],
