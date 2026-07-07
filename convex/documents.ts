@@ -1,7 +1,63 @@
 import { v } from "convex/values";
 
-import { mutation, query } from "./_generated/server";
+import { mutation, query, MutationCtx } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
+
+const MAX_VERSIONS = 20;
+
+const getSortValue = (document: Doc<"documents">) =>
+  document.sortOrder ?? document._creationTime;
+
+const sortDocuments = (documents: Doc<"documents">[]) =>
+  [...documents].sort((a, b) => getSortValue(b) - getSortValue(a));
+
+const isDescendant = async (
+  ctx: { db: { get: (id: Id<"documents">) => Promise<Doc<"documents"> | null> } },
+  ancestorId: Id<"documents">,
+  candidateId: Id<"documents">
+): Promise<boolean> => {
+  let current: Doc<"documents"> | null = await ctx.db.get(candidateId);
+
+  while (current) {
+    if (current._id === ancestorId) {
+      return true;
+    }
+
+    if (!current.parentDocument) {
+      break;
+    }
+
+    current = await ctx.db.get(current.parentDocument);
+  }
+
+  return false;
+};
+
+const saveDocumentVersion = async (
+  ctx: MutationCtx,
+  document: Doc<"documents">,
+  content: string
+) => {
+  await ctx.db.insert("documentVersions", {
+    documentId: document._id,
+    userId: document.userId,
+    title: document.title,
+    content,
+    createdAt: Date.now(),
+  });
+
+  const versions = await ctx.db
+    .query("documentVersions")
+    .withIndex("by_document", (q) => q.eq("documentId", document._id))
+    .order("desc")
+    .collect();
+
+  if (versions.length > MAX_VERSIONS) {
+    for (const version of versions.slice(MAX_VERSIONS)) {
+      await ctx.db.delete(version._id);
+    }
+  }
+};
 
 export const archive = mutation({
   args: { id: v.id("documents") },
@@ -70,10 +126,9 @@ export const getSidebar = query({
         q.eq("userId", userId).eq("parentDocument", args.parentDocument)
       )
       .filter((q) => q.eq(q.field("isArchived"), false))
-      .order("desc")
       .collect();
 
-    return documents;
+    return sortDocuments(documents);
   },
 });
 
@@ -92,6 +147,7 @@ export const create = mutation({
     }
 
     const userId = identity.subject;
+    const now = Date.now();
 
     const document = await ctx.db.insert("documents", {
       title: args.title,
@@ -103,9 +159,10 @@ export const create = mutation({
       isLocked: false,
       isFullWidth: false,
       isSmallText: false,
+      sortOrder: now,
       content: args.content,
       icon: args.icon,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
 
     return document;
@@ -306,6 +363,18 @@ export const update = mutation({
       if (parentDocument === args.id) {
         throw new Error("A page cannot be its own parent");
       }
+
+      if (await isDescendant(ctx, args.id, parentDocument)) {
+        throw new Error("A page cannot be moved inside its own subpage");
+      }
+    }
+
+    if (
+      rest.content !== undefined &&
+      rest.content !== existingDocument.content &&
+      existingDocument.content
+    ) {
+      await saveDocumentVersion(ctx, existingDocument, existingDocument.content);
     }
 
     const document = await ctx.db.patch(args.id, {
@@ -476,6 +545,7 @@ export const duplicate = mutation({
         isLocked: document.isLocked ?? false,
         isFullWidth: document.isFullWidth ?? false,
         isSmallText: document.isSmallText ?? false,
+        sortOrder: Date.now(),
         content: document.content,
         coverImage: document.coverImage,
         icon: document.icon,
@@ -498,6 +568,122 @@ export const duplicate = mutation({
     };
 
     return duplicateDocument(source, source.parentDocument, true);
+  },
+});
+
+export const getVersions = query({
+  args: {
+    documentId: v.id("documents"),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const document = await ctx.db.get(args.documentId);
+
+    if (!document || document.userId !== userId) {
+      throw new Error("Not found");
+    }
+
+    return ctx.db
+      .query("documentVersions")
+      .withIndex("by_document", (q) => q.eq("documentId", args.documentId))
+      .order("desc")
+      .take(args.limit ?? MAX_VERSIONS);
+  },
+});
+
+export const restoreVersion = mutation({
+  args: { versionId: v.id("documentVersions") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const version = await ctx.db.get(args.versionId);
+
+    if (!version || version.userId !== userId) {
+      throw new Error("Not found");
+    }
+
+    const document = await ctx.db.get(version.documentId);
+
+    if (!document || document.userId !== userId) {
+      throw new Error("Not found");
+    }
+
+    if (document.content) {
+      await saveDocumentVersion(ctx, document, document.content);
+    }
+
+    await ctx.db.patch(version.documentId, {
+      content: version.content,
+      updatedAt: Date.now(),
+    });
+
+    return version.documentId;
+  },
+});
+
+export const reorderDocument = mutation({
+  args: {
+    activeId: v.id("documents"),
+    overId: v.id("documents"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const active = await ctx.db.get(args.activeId);
+    const over = await ctx.db.get(args.overId);
+
+    if (!active || !over || active.userId !== userId || over.userId !== userId) {
+      throw new Error("Not found");
+    }
+
+    if (active._id === over._id) {
+      return active._id;
+    }
+
+    if (await isDescendant(ctx, active._id, over._id)) {
+      throw new Error("A page cannot be moved inside its own subpage");
+    }
+
+    const siblings = sortDocuments(
+      await ctx.db
+        .query("documents")
+        .withIndex("by_user_parent", (q) =>
+          q.eq("userId", userId).eq("parentDocument", over.parentDocument)
+        )
+        .filter((q) => q.eq(q.field("isArchived"), false))
+        .collect()
+    ).filter((document) => document._id !== active._id);
+
+    const overIndex = siblings.findIndex((document) => document._id === over._id);
+    const overSort = getSortValue(over);
+    const above = overIndex > 0 ? siblings[overIndex - 1] : undefined;
+    const aboveSort = above ? getSortValue(above) : overSort + 1000;
+    const newSort = (overSort + aboveSort) / 2;
+
+    await ctx.db.patch(active._id, {
+      parentDocument: over.parentDocument,
+      sortOrder: newSort,
+      updatedAt: Date.now(),
+    });
+
+    return active._id;
   },
 });
 

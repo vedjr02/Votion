@@ -15,8 +15,16 @@ export default defineSchema({
     isLocked: v.optional(v.boolean()),
     isFullWidth: v.optional(v.boolean()),
     isSmallText: v.optional(v.boolean()),
+    sortOrder: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])
     .index("by_user_parent", ["userId", "parentDocument"]),
+  documentVersions: defineTable({
+    documentId: v.id("documents"),
+    userId: v.string(),
+    title: v.string(),
+    content: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index("by_document", ["documentId", "createdAt"]),
 });

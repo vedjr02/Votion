@@ -8,8 +8,11 @@ import {
   Check,
   Copy,
   Download,
+  FileUp,
+  History,
   Link2,
   Lock,
+  FolderInput,
   Maximize2,
   Minimize2,
   MoreHorizontal,
@@ -36,6 +39,9 @@ import {
   downloadMarkdownFile,
   exportDocumentToMarkdown,
 } from "@/lib/export-markdown";
+import { useImportMarkdown } from "@/hooks/use-import-markdown";
+import { useMoveToPicker } from "@/hooks/use-move-to-picker";
+import { useVersionHistory } from "@/hooks/use-version-history";
 
 interface MenuProps {
   document: Doc<"documents">;
@@ -158,6 +164,18 @@ export const Menu = ({ document }: MenuProps) => {
     toast.success("Page exported as Markdown");
   };
 
+  const onOpenVersionHistory = () => {
+    useVersionHistory.getState().onOpen(document._id);
+  };
+
+  const onOpenMoveTo = () => {
+    useMoveToPicker.getState().onOpen(document._id);
+  };
+
+  const onOpenImportMarkdown = () => {
+    useImportMarkdown.getState().onOpen(document._id);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -187,6 +205,14 @@ export const Menu = ({ document }: MenuProps) => {
           <Download className="h-4 w-4 mr-2" />
           Export as Markdown
         </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenImportMarkdown}>
+          <FileUp className="h-4 w-4 mr-2" />
+          Import Markdown
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenVersionHistory}>
+          <History className="h-4 w-4 mr-2" />
+          Page history
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onToggleFullWidth}>
           {document.isFullWidth ? (
@@ -214,6 +240,10 @@ export const Menu = ({ document }: MenuProps) => {
             Move to top level
           </DropdownMenuItem>
         )}
+        <DropdownMenuItem onClick={onOpenMoveTo}>
+          <FolderInput className="h-4 w-4 mr-2" />
+          Move to...
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onArchive}>
           <Trash className="h-4 w-4 mr-2" />

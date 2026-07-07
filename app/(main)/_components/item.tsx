@@ -34,11 +34,16 @@ interface ItemProps {
   expanded?: boolean;
   isSearch?: boolean;
   isFavorite?: boolean;
+  isDragOver?: boolean;
   level?: number;
   onExpand?: () => void;
   label: string;
   onClick?: () => void;
   icon: LucideIcon;
+  onDragStart?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragEnd?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
 }
 
 const Item = ({
@@ -53,6 +58,11 @@ const Item = ({
   onExpand,
   expanded,
   isFavorite,
+  isDragOver,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }: ItemProps) => {
   const { user } = useUser();
   const router = useRouter();
@@ -122,12 +132,18 @@ const Item = ({
     <div
       onClick={onClick}
       role="button"
+      draggable={!!id}
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
       style={{
         paddingLeft: level ? `${level * 12 + 12}px` : "12px",
       }}
       className={cn(
         "group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-primary/5 flex items-center text-muted-foreground font-medium",
-        active && "bg-primary/5 text-primary"
+        active && "bg-primary/5 text-primary",
+        isDragOver && "bg-primary/10 ring-1 ring-primary/20"
       )}
     >
       {!!id && (

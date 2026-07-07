@@ -2,8 +2,10 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { useMutation } from "convex/react";
+import { toast } from "sonner";
 
-import { Doc, Id } from "@/convex/_generated/dataModel";
+import { Id } from "@/convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import Item from "./item";
@@ -13,13 +15,15 @@ import { FileIcon } from "lucide-react";
 interface DocumentListProps {
   parentDocumentId?: Id<"documents">;
   level?: number;
-  data?: Doc<"documents">[];
 }
 
 const DocumentList = ({ parentDocumentId, level = 0 }: DocumentListProps) => {
   const params = useParams();
   const router = useRouter();
+  const reorder = useMutation(api.documents.reorderDocument);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [draggedId, setDraggedId] = useState<Id<"documents"> | null>(null);
+  const [dragOverId, setDragOverId] = useState<Id<"documents"> | null>(null);
 
   const onExpand = (documentId: string) => {
     setExpanded((prevExpanded) => ({
@@ -34,6 +38,19 @@ const DocumentList = ({ parentDocumentId, level = 0 }: DocumentListProps) => {
 
   const onRedirect = (documentId: string) => {
     router.push(`/documents/${documentId}`);
+  };
+
+  const handleDrop = async (overId: Id<"documents">) => {
+    if (!draggedId || draggedId === overId) return;
+
+    try {
+      await reorder({ activeId: draggedId, overId });
+    } catch {
+      toast.error("Failed to reorder page");
+    } finally {
+      setDraggedId(null);
+      setDragOverId(null);
+    }
   };
 
   if (documents === undefined) {
@@ -73,9 +90,29 @@ const DocumentList = ({ parentDocumentId, level = 0 }: DocumentListProps) => {
             documentIcon={document.icon}
             active={params.documentId == document._id}
             isFavorite={document.isFavorite}
+            isDragOver={dragOverId === document._id}
             level={level}
             onExpand={() => onExpand(document._id)}
             expanded={expanded[document._id]}
+            onDragStart={(event) => {
+              setDraggedId(document._id);
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", document._id);
+            }}
+            onDragEnd={() => {
+              setDraggedId(null);
+              setDragOverId(null);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              event.dataTransfer.dropEffect = "move";
+              setDragOverId(document._id);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              handleDrop(document._id);
+            }}
           />
           {expanded[document._id] && (
             <DocumentList parentDocumentId={document._id} level={level + 1} />
