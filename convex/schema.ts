@@ -14,6 +14,7 @@ export default defineSchema({
     isFavorite: v.optional(v.boolean()),
     isLocked: v.optional(v.boolean()),
     isFullWidth: v.optional(v.boolean()),
+    isSmallText: v.optional(v.boolean()),
     updatedAt: v.optional(v.number()),
   })
     .index("by_user", ["userId"])

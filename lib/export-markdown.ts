@@ -13,9 +13,14 @@ type Block = {
     checked?: boolean;
     data?: string;
     open?: boolean;
+    url?: string;
+    title?: string;
+    description?: string;
   };
   children?: Block[];
 };
+
+const urlProp = (value?: string) => value?.trim() ?? "";
 
 const inlineToMarkdown = (content?: BlockContent[] | string) => {
   if (!content) return "";
@@ -95,6 +100,15 @@ const blockToMarkdown = (block: Block, depth = 0): string => {
       return `\`\`\`\n${text}\n\`\`\`\n\n${children}`;
     case "votionSmallText":
       return `*${text}*\n\n${children}`;
+    case "votionEmbed":
+      return urlProp(block.props?.url)
+        ? `[Embed](${block.props?.url})\n\n${children}`
+        : children;
+    case "votionBookmark": {
+      const url = block.props?.url;
+      const title = block.props?.title || url || "Bookmark";
+      return url ? `[${title}](${url})\n\n${children}` : children;
+    }
     case "votionDivider":
       return `---\n\n${children}`;
     case "votionTable":

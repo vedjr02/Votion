@@ -421,3 +421,144 @@ body,
 .votion-template-preview .bn-block-group {
   margin-bottom: 0.15rem;
 }
+
+.votion-page-small-text .votion-editor .bn-editor {
+  font-size: 14px;
+}
+
+.votion-page-small-text .votion-editor [data-content-type="heading"] {
+  font-size: 1.5rem;
+}
+
+/* Embed blocks */
+.votion-embed-root {
+  margin: 0.5rem 0 1rem;
+}
+
+.votion-embed-frame-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  border-radius: 3px;
+  overflow: hidden;
+  background: rgba(55, 53, 47, 0.06);
+}
+
+.dark .votion-embed-frame-wrap {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.votion-embed-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.votion-embed-input {
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: 3px;
+  background: transparent;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.votion-embed-input:focus {
+  border-color: hsl(var(--ring));
+}
+
+.votion-embed-input-compact {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.votion-embed-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.votion-embed-hint {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Bookmark blocks */
+.votion-bookmark-root {
+  margin: 0.5rem 0 1rem;
+}
+
+.votion-bookmark-input {
+  width: 100%;
+  border: 1px solid hsl(var(--border));
+  border-radius: 3px;
+  background: transparent;
+  padding: 0.55rem 0.65rem;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.votion-bookmark-card {
+  display: flex;
+  align-items: stretch;
+  gap: 0.75rem;
+  margin: 0.5rem 0 1rem;
+  padding: 0.85rem 0.9rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 3px;
+  background: hsl(var(--background));
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.votion-bookmark-card:hover {
+  background: hsl(var(--muted) / 0.25);
+}
+
+.votion-bookmark-body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.votion-bookmark-title,
+.votion-bookmark-title-input {
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.votion-bookmark-description,
+.votion-bookmark-description-input {
+  font-size: 0.8125rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.4;
+}
+
+.votion-bookmark-url,
+.votion-bookmark-url-input {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-bookmark-title-input,
+.votion-bookmark-description-input,
+.votion-bookmark-url-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+}
+
+.votion-bookmark-icon {
+  display: flex;
+  align-items: center;
+  color: hsl(var(--muted-foreground));
+}

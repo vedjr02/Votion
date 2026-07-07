@@ -68,11 +68,13 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         )}
       >
         <Toolbar preview initialData={document} />
-        <Editor
-          editable={false}
-          onChange={onChange}
-          initialContent={document.content}
-        />
+        <div className={cn(document.isSmallText && "votion-page-small-text")}>
+          <Editor
+            editable={false}
+            onChange={onChange}
+            initialContent={document.content}
+          />
+        </div>
       </div>
     </div>
   );

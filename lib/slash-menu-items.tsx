@@ -11,12 +11,14 @@ import {
   AlertCircle,
   AlertTriangle,
   AtSign,
+  Bookmark,
   Calendar,
   CheckSquare,
   ChevronRight,
   Code2,
   Columns,
   File,
+  Film,
   Heading1,
   Heading2,
   Heading3,
@@ -24,6 +26,7 @@ import {
   List,
   ListOrdered,
   Minus,
+  PlusSquare,
   Quote,
   Smile,
   Sparkles,
@@ -33,6 +36,8 @@ import {
 } from "lucide-react";
 
 import { VotionBlockSchema, votionBlockSchema } from "@/lib/block-schema";
+import { emptyBookmarkBlock } from "@/lib/blocks/votion-bookmark-block";
+import { emptyEmbedBlock } from "@/lib/blocks/votion-embed-block";
 import { usePageLinkPicker } from "@/hooks/use-page-link-picker";
 import {
   blockWithText,
@@ -170,6 +175,16 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
       insertOrUpdateBlock(editor, emptyToggleBlock(2)),
   },
   {
+    name: "New subpage",
+    aliases: ["subpage", "child page", "nested page"],
+    group: "Basic blocks",
+    icon: <PlusSquare size={18} />,
+    hint: "Create a child page and link to it",
+    execute: (editor) => {
+      usePageLinkPicker.getState().onOpen(editor);
+    },
+  },
+  {
     name: "Bulleted list",
     aliases: ["ul", "bullet", "unordered"],
     group: "Lists",
@@ -283,6 +298,22 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Side-by-side editable columns",
     execute: (editor) =>
       insertOrUpdateBlock(editor, defaultColumnLayout()),
+  },
+  {
+    name: "Embed",
+    aliases: ["embed", "iframe", "youtube", "video"],
+    group: "Media",
+    icon: <Film size={18} />,
+    hint: "Embed YouTube, Vimeo, or Loom",
+    execute: (editor) => insertOrUpdateBlock(editor, emptyEmbedBlock()),
+  },
+  {
+    name: "Bookmark",
+    aliases: ["bookmark", "web", "link preview", "url"],
+    group: "Media",
+    icon: <Bookmark size={18} />,
+    hint: "Save a link as a bookmark card",
+    execute: (editor) => insertOrUpdateBlock(editor, emptyBookmarkBlock()),
   },
   {
     name: "Today",

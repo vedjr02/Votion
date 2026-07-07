@@ -10,6 +10,9 @@ type SearchBlock = {
   props?: {
     data?: string;
     checked?: boolean;
+    url?: string;
+    title?: string;
+    description?: string;
   };
   children?: SearchBlock[];
 };
@@ -57,6 +60,10 @@ export const extractPlainTextFromBlocks = (blocks: SearchBlock[]): string =>
       if (block.type === "checkListItem" && block.props?.checked) {
         parts.push("done");
       }
+
+      if (block.props?.url) parts.push(block.props.url);
+      if (block.props?.title) parts.push(block.props.title);
+      if (block.props?.description) parts.push(block.props.description);
 
       if (block.children?.length) {
         parts.push(extractPlainTextFromBlocks(block.children));

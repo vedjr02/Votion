@@ -2,15 +2,17 @@
 
 import { useMutation, useQuery } from "convex/react";
 import dynamic from "next/dynamic";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Lock } from "lucide-react";
 
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { Backlinks } from "@/components/backlinks";
 import { Toolbar } from "@/components/toolbar";
 import { Cover } from "@/components/cover";
 import { Breadcrumbs } from "@/components/breadcrumbs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePageLinkPicker } from "@/hooks/use-page-link-picker";
 import { cn } from "@/lib/utils";
 
 interface DocumentIdPageProps {
@@ -30,6 +32,10 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
   });
 
   const update = useMutation(api.documents.update);
+
+  useEffect(() => {
+    usePageLinkPicker.getState().setParentDocumentId(params.documentId);
+  }, [params.documentId]);
 
   const onChange = (content: string) => {
     if (document?.isLocked) return;
@@ -79,11 +85,14 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
         )}
       >
         <Toolbar initialData={document} />
-        <Editor
-          onChange={onChange}
-          initialContent={document.content}
-          editable={!document.isLocked}
-        />
+        <div className={cn(document.isSmallText && "votion-page-small-text")}>
+          <Editor
+            onChange={onChange}
+            initialContent={document.content}
+            editable={!document.isLocked}
+          />
+        </div>
+        <Backlinks documentId={params.documentId} />
       </div>
     </div>
   );

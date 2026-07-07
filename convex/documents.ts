@@ -102,6 +102,7 @@ export const create = mutation({
       isFavorite: false,
       isLocked: false,
       isFullWidth: false,
+      isSmallText: false,
       content: args.content,
       icon: args.icon,
       updatedAt: Date.now(),
@@ -277,6 +278,7 @@ export const update = mutation({
     isFavorite: v.optional(v.boolean()),
     isLocked: v.optional(v.boolean()),
     isFullWidth: v.optional(v.boolean()),
+    isSmallText: v.optional(v.boolean()),
     parentDocument: v.optional(v.union(v.id("documents"), v.null())),
   },
   handler: async (ctx, args) => {
@@ -409,6 +411,40 @@ export const getAncestors = query({
   },
 });
 
+export const getBacklinks = query({
+  args: { documentId: v.id("documents") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const targetId = args.documentId;
+    const needle = `/documents/${targetId}`;
+
+    const documents = await ctx.db
+      .query("documents")
+      .withIndex("by_user", (q) => q.eq("userId", userId))
+      .filter((q) => q.eq(q.field("isArchived"), false))
+      .collect();
+
+    return documents
+      .filter(
+        (document) =>
+          document._id !== targetId && document.content?.includes(needle)
+      )
+      .map((document) => ({
+        _id: document._id,
+        title: document.title,
+        icon: document.icon,
+        updatedAt: document.updatedAt,
+      }))
+      .sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+  },
+});
+
 export const duplicate = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {
@@ -439,6 +475,7 @@ export const duplicate = mutation({
         isFavorite: false,
         isLocked: document.isLocked ?? false,
         isFullWidth: document.isFullWidth ?? false,
+        isSmallText: document.isSmallText ?? false,
         content: document.content,
         coverImage: document.coverImage,
         icon: document.icon,

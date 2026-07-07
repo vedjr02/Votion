@@ -17,6 +17,7 @@ import {
   Trash,
   Unlock,
   Files,
+  Type,
 } from "lucide-react";
 
 import { Doc } from "@/convex/_generated/dataModel";
@@ -118,6 +119,21 @@ export const Menu = ({ document }: MenuProps) => {
     });
   };
 
+  const onToggleSmallText = () => {
+    const promise = update({
+      id: document._id,
+      isSmallText: !document.isSmallText,
+    });
+
+    toast.promise(promise, {
+      loading: "Updating typography...",
+      success: document.isSmallText
+        ? "Switched to default text size"
+        : "Switched to small text",
+      error: "Failed to update typography.",
+    });
+  };
+
   const onMoveToRoot = () => {
     const promise = update({
       id: document._id,
@@ -179,6 +195,10 @@ export const Menu = ({ document }: MenuProps) => {
             <Maximize2 className="h-4 w-4 mr-2" />
           )}
           {document.isFullWidth ? "Default width" : "Full width"}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onToggleSmallText}>
+          <Type className="h-4 w-4 mr-2" />
+          {document.isSmallText ? "Default text size" : "Small text"}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onToggleLock}>
           {document.isLocked ? (
