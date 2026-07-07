@@ -19,6 +19,10 @@ import {
   twoColumns,
   type TemplateContent,
 } from "@/lib/template-blocks";
+import {
+  PERSONAL_FINANCE_TRACKER_SOURCE,
+  personalFinanceTrackerContent,
+} from "@/lib/templates/personal-finance-tracker";
 
 export type TemplateCategory =
   | "productivity"
@@ -34,6 +38,7 @@ export type DocumentTemplate = {
   description: string;
   category: TemplateCategory;
   featured?: boolean;
+  sourceUrl?: string;
   content: PartialBlock<VotionBlockSchema>[];
 };
 
@@ -141,42 +146,6 @@ const classNotesContent: TemplateContent = [
     bullet("Link or resource"),
   ]),
   ...section("Quick summary", [quote()]),
-];
-
-const financeTrackerContent: TemplateContent = [
-  h1("Finance Tracker"),
-  callout("blue"),
-  ...section("Monthly overview", [
-    ...table(
-      ["Metric", "Amount"],
-      [
-        ["Starting balance", ""],
-        ["Total income", ""],
-        ["Total expenses", ""],
-        ["Remaining", ""],
-      ]
-    ),
-  ]),
-  divider(),
-  ...section("Income", [
-    ...table(["Source", "Amount", "Date"], [["", "", ""]]),
-  ]),
-  ...section("Fixed expenses", [
-    ...table(["Category", "Amount"], [["", ""]]),
-  ]),
-  ...section("Variable expenses", [
-    ...table(["Category", "Amount", "Notes"], [["", "", ""]]),
-  ]),
-  ...section("Savings goals", [
-    ...table(["Goal", "Target", "Current"], [["", "", ""]]),
-  ]),
-  ...section("Category breakdown", [
-    ...table(
-      ["Housing", "Food", "Transport", "Entertainment", "Other"],
-      [["", "", "", "", ""]]
-    ),
-  ]),
-  ...section("Notes", [callout("yellow")]),
 ];
 
 const todoListContent: TemplateContent = [
@@ -415,14 +384,15 @@ export const documentTemplates: DocumentTemplate[] = [
     content: classNotesContent,
   },
   {
-    id: "finance-tracker",
-    title: "Finance Tracker",
+    id: "personal-finance-tracker",
+    title: "Personal Finance Tracker",
     icon: "💰",
     category: "finance",
     featured: true,
+    sourceUrl: PERSONAL_FINANCE_TRACKER_SOURCE,
     description:
-      "Income, expenses, savings goals, and category breakdown in table layouts.",
-    content: financeTrackerContent,
+      "Official Notion-style finance tracker with quarterly overview, income & expense tables, categories, and tax set-aside reminders.",
+    content: personalFinanceTrackerContent,
   },
   {
     id: "todo-list",

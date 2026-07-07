@@ -186,3 +186,16 @@ body,
 .votion-template-preview .bn-block-group {
   margin-bottom: 0.15rem;
 }
+
+/* Finance tracker tables — database-style rows */
+.votion-editor [data-content-type="paragraph"] .inlineContent code,
+.votion-editor [data-content-type="paragraph"] [data-style-code="true"] {
+  letter-spacing: 0.01em;
+}
+
+.votion-editor .blockContent[data-background-color="blue"],
+.votion-editor .blockContent[data-background-color="green"],
+.votion-editor .blockContent[data-background-color="yellow"],
+.votion-editor .blockContent[data-background-color="gray"] {
+  margin: 0.35rem 0;
+}

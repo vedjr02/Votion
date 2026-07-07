@@ -65,6 +65,19 @@ export const TemplatePreviewDialog = ({
               <DialogDescription>{template.description}</DialogDescription>
               <p className="text-xs text-muted-foreground">
                 {getCategoryLabel(template.category)} · Preview only
+                {template.sourceUrl && (
+                  <>
+                    {" · "}
+                    <a
+                      href={template.sourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="underline hover:text-foreground"
+                    >
+                      Based on Notion template
+                    </a>
+                  </>
+                )}
               </p>
             </div>
           </div>

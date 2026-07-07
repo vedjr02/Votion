@@ -100,6 +100,16 @@ export const table = (
   ),
 ];
 
+export const tableWithEmptyRows = (
+  headers: string[],
+  emptyRows = 4
+): TemplateContent => [
+  ...table(
+    headers,
+    Array.from({ length: emptyRows }, () => headers.map(() => ""))
+  ),
+];
+
 export const twoColumns = (
   leftTitle: string,
   rightTitle: string,
