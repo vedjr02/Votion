@@ -56,7 +56,7 @@ export const TemplatePreviewDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl w-[95vw] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
+      <DialogContent className="max-w-6xl w-[96vw] max-h-[90vh] overflow-hidden flex flex-col p-0 gap-0">
         <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <div className="flex items-start gap-3 pr-8">
             <span className="text-3xl">{template.icon}</span>
@@ -84,7 +84,7 @@ export const TemplatePreviewDialog = ({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto bg-muted/20 px-2 py-4 min-h-[420px]">
-          <div className="mx-auto max-w-3xl rounded-lg border bg-background shadow-sm">
+          <div className="mx-auto max-w-none rounded-lg border bg-background shadow-sm">
             <TemplatePreviewEditor content={template.content} />
           </div>
         </div>

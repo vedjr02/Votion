@@ -6,6 +6,12 @@ import {
   emptyBlock,
   emptyCheckListItems,
 } from "@/lib/editor-blocks";
+import type {
+  NotionColumnsData,
+  NotionDatabaseData,
+  NotionGalleryData,
+} from "@/lib/notion-blocks/types";
+import { stringifyJsonProp } from "@/lib/notion-blocks/types";
 
 export type TemplateBlock = PartialBlock<VotionBlockSchema>;
 export type TemplateContent = TemplateBlock[];
@@ -140,3 +146,112 @@ export const section = (
 };
 
 export const labeledField = (label: string): TemplateBlock => bullet(`${label}`);
+
+export const notionGallery = (data: NotionGalleryData): TemplateBlock => ({
+  type: "notionGallery",
+  props: { ...baseProps, data: stringifyJsonProp(data) },
+  children: [],
+});
+
+export const notionDatabase = (data: NotionDatabaseData): TemplateBlock => ({
+  type: "notionDatabase",
+  props: { ...baseProps, data: stringifyJsonProp(data) },
+  children: [],
+});
+
+export const notionColumns = (data: NotionColumnsData): TemplateBlock => ({
+  type: "notionColumns",
+  props: { ...baseProps, data: stringifyJsonProp(data) },
+  children: [],
+});
+
+const columnId = (label: string) =>
+  label
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_|_$/g, "") || "col";
+
+export const simpleDatabase = (
+  title: string,
+  columns: string[],
+  rows: string[][],
+  options?: {
+    icon?: string;
+    tabs?: string[];
+    groupTitle?: string;
+    sumColumn?: string;
+  }
+): TemplateBlock => {
+  const cols = columns.map((label) => ({ id: columnId(label), label }));
+
+  return notionDatabase({
+    title,
+    icon: options?.icon,
+    tabs: options?.tabs ?? ["All"],
+    activeTab: options?.tabs?.[0],
+    columns: cols,
+    sumColumnId: options?.sumColumn ? columnId(options.sumColumn) : undefined,
+    groups: [
+      {
+        title: options?.groupTitle ?? title,
+        rows: rows.map((cells, index) => ({
+          id: `${columnId(title)}-${index}`,
+          cells: Object.fromEntries(
+            cols.map((col, columnIndex) => [col.id, cells[columnIndex] ?? ""])
+          ),
+        })),
+      },
+    ],
+  });
+};
+
+export const simpleColumns = (
+  leftTitle: string,
+  rightTitle: string,
+  columns: string[],
+  leftRows: string[][],
+  rightRows: string[][],
+  options?: { leftIcon?: string; rightIcon?: string }
+): TemplateBlock =>
+  notionColumns({
+    left: {
+      title: leftTitle,
+      icon: options?.leftIcon,
+      tabs: ["All"],
+      columns: columns.map((label) => ({ id: columnId(label), label })),
+      groups: [
+        {
+          title: leftTitle,
+          rows: leftRows.map((cells, index) => ({
+            id: `left-${index}`,
+            cells: Object.fromEntries(
+              columns.map((label, columnIndex) => [
+                columnId(label),
+                cells[columnIndex] ?? "",
+              ])
+            ),
+          })),
+        },
+      ],
+    },
+    right: {
+      title: rightTitle,
+      icon: options?.rightIcon,
+      tabs: ["All"],
+      columns: columns.map((label) => ({ id: columnId(label), label })),
+      groups: [
+        {
+          title: rightTitle,
+          rows: rightRows.map((cells, index) => ({
+            id: `right-${index}`,
+            cells: Object.fromEntries(
+              columns.map((label, columnIndex) => [
+                columnId(label),
+                cells[columnIndex] ?? "",
+              ])
+            ),
+          })),
+        },
+      ],
+    },
+  });
