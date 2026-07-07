@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/clerk-react";
 import { useMutation } from "convex/react";
@@ -8,6 +9,8 @@ import {
   Check,
   Copy,
   Download,
+  ExternalLink,
+  FileCode2,
   FileUp,
   History,
   Link2,
@@ -39,6 +42,11 @@ import {
   downloadMarkdownFile,
   exportDocumentToMarkdown,
 } from "@/lib/export-markdown";
+import {
+  downloadHtmlFile,
+  exportDocumentToHtml,
+} from "@/lib/export-html";
+import { formatPageTimestamp, getPageStats } from "@/lib/page-stats";
 import { useImportMarkdown } from "@/hooks/use-import-markdown";
 import { useMoveToPicker } from "@/hooks/use-move-to-picker";
 import { useVersionHistory } from "@/hooks/use-version-history";
@@ -57,6 +65,10 @@ export const Menu = ({ document }: MenuProps) => {
   const duplicate = useMutation(api.documents.duplicate);
 
   const pageUrl = `${origin}/documents/${document._id}`;
+  const pageStats = useMemo(
+    () => getPageStats(document.content),
+    [document.content]
+  );
 
   const onArchive = () => {
     const promise = archive({ id: document._id }).then(() => {
@@ -164,6 +176,16 @@ export const Menu = ({ document }: MenuProps) => {
     toast.success("Page exported as Markdown");
   };
 
+  const onExportHtml = () => {
+    const html = exportDocumentToHtml(document.title, document.content);
+    downloadHtmlFile(document.title, html);
+    toast.success("Page exported as HTML");
+  };
+
+  const onOpenInNewTab = () => {
+    window.open(pageUrl, "_blank", "noopener,noreferrer");
+  };
+
   const onOpenVersionHistory = () => {
     useVersionHistory.getState().onOpen(document._id);
   };
@@ -204,6 +226,14 @@ export const Menu = ({ document }: MenuProps) => {
         <DropdownMenuItem onClick={onExportMarkdown}>
           <Download className="h-4 w-4 mr-2" />
           Export as Markdown
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onExportHtml}>
+          <FileCode2 className="h-4 w-4 mr-2" />
+          Export as HTML
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onOpenInNewTab}>
+          <ExternalLink className="h-4 w-4 mr-2" />
+          Open in new tab
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onOpenImportMarkdown}>
           <FileUp className="h-4 w-4 mr-2" />
@@ -251,6 +281,14 @@ export const Menu = ({ document }: MenuProps) => {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <div className="text-xs text-muted-foreground p-2 space-y-1">
+          <p>
+            {pageStats.words} words · {pageStats.characters} characters
+          </p>
+          <p>Created {formatPageTimestamp(document._creationTime)}</p>
+          <p>
+            Last edited{" "}
+            {formatPageTimestamp(document.updatedAt ?? document._creationTime)}
+          </p>
           <p>Last edited by: {user?.fullName}</p>
           {document.isLocked && (
             <p className="flex items-center gap-1">

@@ -1,3 +1,5 @@
+import { collectHeadings, TocBlock } from "@/lib/toc-utils";
+
 type BlockContent = {
   type?: string;
   text?: string;
@@ -5,11 +7,9 @@ type BlockContent = {
   styles?: Record<string, boolean>;
 };
 
-type Block = {
-  type?: string;
+type Block = TocBlock & {
   content?: BlockContent[] | string;
-  props?: {
-    level?: number;
+  props?: TocBlock["props"] & {
     checked?: boolean;
     data?: string;
     open?: boolean;
@@ -68,17 +68,28 @@ const tableToMarkdown = (dataProp?: string) => {
   }
 };
 
-const blocksToMarkdown = (blocks: Block[], depth = 0): string =>
-  blocks
-    .map((block) => blockToMarkdown(block, depth))
+const blocksToMarkdown = (
+  blocks: Block[],
+  depth = 0,
+  headings?: ReturnType<typeof collectHeadings>
+): string => {
+  const pageHeadings = headings ?? collectHeadings(blocks);
+
+  return blocks
+    .map((block) => blockToMarkdown(block, depth, pageHeadings))
     .filter(Boolean)
     .join("");
+};
 
-const blockToMarkdown = (block: Block, depth = 0): string => {
+const blockToMarkdown = (
+  block: Block,
+  depth = 0,
+  headings: ReturnType<typeof collectHeadings> = []
+): string => {
   const text = inlineToMarkdown(block.content);
   const indent = "  ".repeat(depth);
   const children = block.children?.length
-    ? blocksToMarkdown(block.children, depth + 1)
+    ? blocksToMarkdown(block.children, depth + 1, headings)
     : "";
 
   switch (block.type) {
@@ -111,6 +122,15 @@ const blockToMarkdown = (block: Block, depth = 0): string => {
     }
     case "votionDivider":
       return `---\n\n${children}`;
+    case "votionToc": {
+      if (headings.length === 0) return children;
+
+      const outline = headings
+        .map((heading) => `${"  ".repeat(Math.max(0, heading.level - 1))}- ${heading.text}`)
+        .join("\n");
+
+      return `## Table of contents\n\n${outline}\n\n${children}`;
+    }
     case "votionTable":
       return `${tableToMarkdown(block.props?.data)}${children}`;
     case "votionColumnList":

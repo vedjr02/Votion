@@ -25,6 +25,7 @@ import {
   Lightbulb,
   List,
   ListOrdered,
+  ListTree,
   Minus,
   PlusSquare,
   Quote,
@@ -51,6 +52,7 @@ import {
   defaultColumnLayout,
   defaultTableLayout,
 } from "@/lib/template-blocks";
+import { emptyTocBlock } from "@/lib/blocks/votion-toc-block";
 
 const isSlashBlock = (editor: BlockNoteEditor<VotionBlockSchema>) => {
   const currentBlock = editor.getTextCursorPosition().block;
@@ -280,6 +282,14 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Highlight an error or blocker",
     execute: (editor) =>
       insertOrUpdateBlock(editor, calloutBlock("red", "🚨")),
+  },
+  {
+    name: "Table of contents",
+    aliases: ["toc", "contents", "outline", "index"],
+    group: "Advanced blocks",
+    icon: <ListTree size={18} />,
+    hint: "Auto-generated outline from headings",
+    execute: (editor) => insertOrUpdateBlock(editor, emptyTocBlock()),
   },
   {
     name: "Table",

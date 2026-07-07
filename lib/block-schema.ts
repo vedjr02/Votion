@@ -10,6 +10,7 @@ import { VotionEmbed } from "@/lib/blocks/votion-embed-block";
 import { VotionSmallText } from "@/lib/blocks/votion-small-text-block";
 import { VotionTable } from "@/lib/blocks/votion-table-block";
 import { VotionToggle } from "@/lib/blocks/votion-toggle-block";
+import { VotionToc } from "@/lib/blocks/votion-toc-block";
 
 export const votionBlockSchema = {
   ...defaultBlockSchema,
@@ -23,6 +24,7 @@ export const votionBlockSchema = {
   votionSmallText: VotionSmallText,
   votionEmbed: VotionEmbed,
   votionBookmark: VotionBookmark,
+  votionToc: VotionToc,
 } as const;
 
 export type VotionBlockSchema = typeof votionBlockSchema;
