@@ -166,3 +166,23 @@ body,
 .votion-editor .blockContent[data-content-type="paragraph"][data-background-color="red"].isEmpty:not(.hasAnchor) .inlineContent:before {
   content: "Warning";
 }
+
+/* Template table rows (markdown-style pipes in code blocks) */
+.votion-editor [data-content-type="paragraph"] .inlineContent code,
+.votion-editor [data-content-type="paragraph"] [data-style-code="true"] {
+  display: block;
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.votion-template-preview .bn-editor {
+  padding-top: 1rem;
+  padding-bottom: 1.5rem;
+}
+
+.votion-template-preview .bn-block-group {
+  margin-bottom: 0.15rem;
+}
