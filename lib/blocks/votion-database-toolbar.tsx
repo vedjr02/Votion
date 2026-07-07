@@ -4,13 +4,12 @@ import {
   ArrowDownUp,
   ChevronDown,
   Filter,
-  LayoutGrid,
   Plus,
   Search,
   SlidersHorizontal,
-  Table2,
-  Kanban,
 } from "lucide-react";
+
+import { DatabaseViewPicker } from "@/lib/blocks/votion-database-view-picker";
 
 import type { TableColumn, TableData } from "@/lib/blocks/votion-block-utils";
 import {
@@ -84,48 +83,7 @@ export const DatabaseToolbar = ({
       </div>
 
       <div className="votion-db-toolbar-actions">
-        <div className="votion-db-icon-group">
-          <button
-            type="button"
-            className={data.view === "table" ? "active" : undefined}
-            title="Table view"
-            onClick={() => onUpdate({ ...data, view: "table" })}
-          >
-            <Table2 size={15} />
-          </button>
-          <button
-            type="button"
-            className={data.view === "board" ? "active" : undefined}
-            title="Board view"
-            onClick={() =>
-              onUpdate({
-                ...data,
-                view: "board",
-                groupByColumnId:
-                  data.groupByColumnId ??
-                  selectColumns[0]?.id ??
-                  data.columns[0]?.id,
-              })
-            }
-          >
-            <Kanban size={15} />
-          </button>
-          <button
-            type="button"
-            className={data.view === "gallery" ? "active" : undefined}
-            title="Gallery view"
-            onClick={() =>
-              onUpdate({
-                ...data,
-                view: "gallery",
-                galleryCardColumnId:
-                  data.galleryCardColumnId ?? data.columns[0]?.id,
-              })
-            }
-          >
-            <LayoutGrid size={15} />
-          </button>
-        </div>
+        <DatabaseViewPicker data={data} onUpdate={onUpdate} />
 
         <div className="votion-db-icon-group">
           <button

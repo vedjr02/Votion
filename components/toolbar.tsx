@@ -1,6 +1,6 @@
 "use client";
 
-import { ElementRef, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ImageIcon, Smile, X } from "lucide-react";
 import { useMutation } from "convex/react";
 import TextareaAutosize from "react-textarea-autosize";
@@ -10,6 +10,7 @@ import { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { api } from "@/convex/_generated/api";
 import { PLACEHOLDER_TITLE } from "@/lib/templates";
+import { usePageActions } from "@/hooks/use-page-actions";
 
 import { IconPicker } from "./icon-picker";
 
@@ -19,7 +20,7 @@ interface ToolbarProps {
 }
 
 export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
-  const inputRef = useRef<ElementRef<"textarea">>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(initialData.title);
 
@@ -52,6 +53,19 @@ export const Toolbar = ({ initialData, preview }: ToolbarProps) => {
     setIsEditing(true);
     focusTitleInput(true);
   }, [initialData._id, initialData.title, preview]);
+
+  const renameDocumentId = usePageActions((store) => store.renameDocumentId);
+  const clearRename = usePageActions((store) => store.clearRename);
+
+  useEffect(() => {
+    if (preview || initialData.isLocked) return;
+    if (renameDocumentId !== initialData._id) return;
+
+    setValue(initialData.title);
+    setIsEditing(true);
+    focusTitleInput(true);
+    clearRename();
+  }, [renameDocumentId, initialData._id, initialData.title, preview, clearRename, initialData.isLocked]);
 
   const enableInput = () => {
     if (preview || initialData.isLocked) return;

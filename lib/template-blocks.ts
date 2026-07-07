@@ -72,6 +72,9 @@ export const numbered = (value: string): TemplateBlock => ({
 export const checkList = (): TemplateBlock =>
   emptyBlock("checkListItem", { checked: false });
 
+export const checkItem = (value: string, checked = false): TemplateBlock =>
+  blockWithText("checkListItem", value, { checked });
+
 export const checkLists = (count: number) => emptyCheckListItems(count);
 
 const calloutIcons: Record<
@@ -147,22 +150,39 @@ export const tableWithEmptyRows = (
 export const columns = (
   left: TemplateContent,
   right: TemplateContent
-): TemplateBlock => ({
+): TemplateBlock => columnGroup(left, right);
+
+export const columnGroup = (...columnContents: TemplateContent[]): TemplateBlock => ({
   type: "votionColumnList",
   props: baseProps,
-  children: [
-    {
-      type: "votionColumn",
-      props: baseProps,
-      children: left.map((block) => ({ ...block, children: block.children ?? [] })),
-    },
-    {
-      type: "votionColumn",
-      props: baseProps,
-      children: right.map((block) => ({ ...block, children: block.children ?? [] })),
-    },
-  ],
+  children: columnContents.map((content) => ({
+    type: "votionColumn",
+    props: baseProps,
+    children: content.map((block) => ({ ...block, children: block.children ?? [] })),
+  })),
 });
+
+export const toggle = (title: string, children: TemplateContent): TemplateBlock => ({
+  type: "votionToggle",
+  props: { ...baseProps, open: true },
+  content: text(title),
+  children: children.map((block) => ({ ...block, children: block.children ?? [] })),
+});
+
+export const smallText = (value: string): TemplateBlock => ({
+  type: "votionSmallText",
+  props: baseProps,
+  content: text(value),
+  children: [],
+});
+
+export const pageTitle = (value: string): TemplateBlock => h1(value);
+
+export const boardDatabase = (
+  headers: string[],
+  rows: string[][],
+  groupByHeader = "Status"
+): TemplateBlock => databaseTable(headers, rows, groupByHeader);
 
 export const twoColumns = (
   leftTitle: string,
@@ -213,9 +233,17 @@ export const defaultColumnLayout = (): TemplateBlock =>
 
 export const defaultTableLayout = (): TemplateBlock =>
   table(
-    ["Column 1", "Column 2", "Column 3"],
+    ["Name", "Tags", "Date"],
     [
       ["", "", ""],
       ["", "", ""],
+      ["", "", ""],
     ]
+  );
+
+export const defaultThreeColumnLayout = (): TemplateBlock =>
+  columnGroup(
+    [h3("Column 1"), emptyBlock("paragraph")],
+    [h3("Column 2"), emptyBlock("paragraph")],
+    [h3("Column 3"), emptyBlock("paragraph")]
   );

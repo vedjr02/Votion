@@ -19,19 +19,25 @@ import {
   Columns,
   File,
   Film,
+  GanttChart,
   Heading1,
   Heading2,
   Heading3,
+  Kanban,
+  LayoutDashboard,
+  LayoutGrid,
   Lightbulb,
   List,
   ListOrdered,
   ListTree,
   Minus,
+  Newspaper,
   PlusSquare,
   Quote,
   Smile,
   Sparkles,
   Table,
+  Table2,
   Text,
   Type,
 } from "lucide-react";
@@ -39,6 +45,15 @@ import {
 import { VotionBlockSchema, votionBlockSchema } from "@/lib/block-schema";
 import { emptyBookmarkBlock } from "@/lib/blocks/votion-bookmark-block";
 import { emptyEmbedBlock } from "@/lib/blocks/votion-embed-block";
+import { DATABASE_VIEW_OPTIONS } from "@/lib/blocks/votion-database-view-options";
+import type { TableView } from "@/lib/blocks/votion-block-utils";
+import {
+  createDatabaseBlock,
+  databaseBlock,
+  habitTrackerData,
+  projectTrackerData,
+  taskBoardData,
+} from "@/lib/database-presets";
 import { usePageLinkPicker } from "@/hooks/use-page-link-picker";
 import {
   blockWithText,
@@ -50,7 +65,7 @@ import {
 } from "@/lib/editor-blocks";
 import {
   defaultColumnLayout,
-  defaultTableLayout,
+  defaultThreeColumnLayout,
 } from "@/lib/template-blocks";
 import { emptyTocBlock } from "@/lib/blocks/votion-toc-block";
 
@@ -111,7 +126,84 @@ const calloutBlock = (
 ) =>
   blockWithText("paragraph", `${icon} `, { backgroundColor: color });
 
+const databaseViewIcons: Record<TableView, JSX.Element> = {
+  table: <Table2 size={18} />,
+  board: <Kanban size={18} />,
+  gallery: <LayoutGrid size={18} />,
+  list: <List size={18} />,
+  feed: <Newspaper size={18} />,
+  dashboard: <LayoutDashboard size={18} />,
+  calendar: <Calendar size={18} />,
+  timeline: <GanttChart size={18} />,
+  map: <LayoutGrid size={18} />,
+  chart: <Table size={18} />,
+};
+
+const databaseViewAliases: Record<TableView, string[]> = {
+  table: ["table view", "grid", "spreadsheet", "rows"],
+  board: ["board view", "kanban", "pipeline", "status"],
+  gallery: ["gallery view", "cards", "card view"],
+  list: ["list view", "compact"],
+  feed: ["feed view", "blog", "posts"],
+  dashboard: ["dashboard view", "stats", "metrics"],
+  calendar: ["calendar view", "schedule", "dates"],
+  timeline: ["timeline view", "gantt", "roadmap"],
+  map: ["map view", "location"],
+  chart: ["chart view", "bar chart", "graph"],
+};
+
+const databaseSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
+  {
+    name: "Database",
+    aliases: ["database", "db", "inline database", "data"],
+    group: "Database",
+    icon: <Table2 size={18} />,
+    hint: "Inline database with table, board, and gallery views",
+    execute: (editor) =>
+      insertOrUpdateBlock(editor, createDatabaseBlock("table")),
+  },
+  ...DATABASE_VIEW_OPTIONS.filter((option) => option.implemented).map(
+    (option) => ({
+      name: option.label,
+      aliases: databaseViewAliases[option.id],
+      group: "Database",
+      icon: databaseViewIcons[option.id],
+      hint: `Create a database in ${option.label.toLowerCase()}`,
+      execute: (editor: BlockNoteEditor<VotionBlockSchema>) =>
+        insertOrUpdateBlock(editor, createDatabaseBlock(option.id)),
+    })
+  ),
+  {
+    name: "Task board",
+    aliases: ["tasks", "task database", "project tasks", "todo board"],
+    group: "Database",
+    icon: <Kanban size={18} />,
+    hint: "Kanban board with status, due date, and priority",
+    execute: (editor) =>
+      insertOrUpdateBlock(editor, databaseBlock(taskBoardData())),
+  },
+  {
+    name: "Habit tracker",
+    aliases: ["habits", "habit database", "daily habits", "streak"],
+    group: "Database",
+    icon: <LayoutGrid size={18} />,
+    hint: "Gallery cards with daily habit checkboxes",
+    execute: (editor) =>
+      insertOrUpdateBlock(editor, databaseBlock(habitTrackerData())),
+  },
+  {
+    name: "Project tracker",
+    aliases: ["projects", "project board", "roadmap board"],
+    group: "Database",
+    icon: <LayoutDashboard size={18} />,
+    hint: "Board grouped by project status",
+    execute: (editor) =>
+      insertOrUpdateBlock(editor, databaseBlock(projectTrackerData())),
+  },
+];
+
 const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
+  ...databaseSlashMenuItems,
   {
     name: "Text",
     aliases: ["text", "plain"],
@@ -292,13 +384,13 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) => insertOrUpdateBlock(editor, emptyTocBlock()),
   },
   {
-    name: "Table",
-    aliases: ["table", "grid", "database", "rows"],
+    name: "3 columns",
+    aliases: ["3col", "three columns", "triple"],
     group: "Advanced blocks",
-    icon: <Table size={18} />,
-    hint: "Full database with table, board, and gallery views",
+    icon: <Columns size={18} />,
+    hint: "Three side-by-side columns like Notion",
     execute: (editor) =>
-      insertOrUpdateBlock(editor, defaultTableLayout()),
+      insertOrUpdateBlock(editor, defaultThreeColumnLayout()),
   },
   {
     name: "2 columns",

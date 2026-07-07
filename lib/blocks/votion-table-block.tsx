@@ -4,8 +4,13 @@ import { createReactBlockSpec } from "@blocknote/react";
 import { DatabaseToolbar } from "@/lib/blocks/votion-database-toolbar";
 import {
   DatabaseBoardView,
+  DatabaseCalendarView,
+  DatabaseDashboardView,
+  DatabaseFeedView,
   DatabaseGalleryView,
+  DatabaseListView,
   DatabaseTableView,
+  DatabaseTimelineView,
 } from "@/lib/blocks/votion-database-views";
 import {
   emptyTable,
@@ -64,6 +69,32 @@ export const VotionTable = createReactBlockSpec({
           />
         ) : data.view === "board" ? (
           <DatabaseBoardView
+            data={data}
+            editable={isEditable}
+            onUpdate={updateData}
+          />
+        ) : data.view === "list" ? (
+          <DatabaseListView
+            data={data}
+            editable={isEditable}
+            onUpdate={updateData}
+          />
+        ) : data.view === "feed" ? (
+          <DatabaseFeedView
+            data={data}
+            editable={isEditable}
+            onUpdate={updateData}
+          />
+        ) : data.view === "dashboard" ? (
+          <DatabaseDashboardView data={data} />
+        ) : data.view === "calendar" ? (
+          <DatabaseCalendarView
+            data={data}
+            editable={isEditable}
+            onUpdate={updateData}
+          />
+        ) : data.view === "timeline" ? (
+          <DatabaseTimelineView
             data={data}
             editable={isEditable}
             onUpdate={updateData}

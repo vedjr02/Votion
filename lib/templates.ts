@@ -4,20 +4,19 @@ import type { VotionBlockSchema } from "@/lib/block-schema";
 import {
   bullet,
   callout,
-  checkLists,
-  columns,
+  checkItem,
+  columnGroup,
+  databaseTable,
   divider,
+  galleryDatabase,
   getBlockPlainText,
   h2,
   h3,
-  intro,
   numbered,
-  p,
   quote,
-  section,
+  smallText,
   table,
-  databaseTable,
-  galleryDatabase,
+  toggle,
   type TemplateContent,
 } from "@/lib/template-blocks";
 import {
@@ -78,13 +77,19 @@ export const templateCategories: {
 export const PLACEHOLDER_TITLE = "Untitled";
 
 const weeklyPlannerContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Set your week in 10 minutes: pick 3 focus tasks, block your calendar, then review on Friday."
   ),
-  columns(
+  h2("This week"),
+  columnGroup(
     [
-      h3("This week's focus"),
-      ...checkLists(3),
+      h3("Focus tasks"),
+      ...[
+        "Ship project milestone",
+        "Study for midterm",
+        "Book dentist appointment",
+      ].map((task) => checkItem(task)),
       callout("green", "Win of the week — celebrate one thing you finished."),
     ],
     [
@@ -104,26 +109,12 @@ const weeklyPlannerContent: TemplateContent = [
       ["Wednesday", "Deep work — project B", "Calls", "Planning"],
       ["Thursday", "Focus block", "Collaboration", "Wrap-up tasks"],
       ["Friday", "Review & retro", "Loose ends", "Weekend prep"],
+      ["Saturday", "Errands & rest", "Social", "Personal projects"],
+      ["Sunday", "Meal prep", "Preview next week", "Rest"],
     ]
   ),
   divider(),
-  h2("Weekend"),
-  columns(
-    [
-      h3("Saturday"),
-      bullet("Errands & life admin"),
-      bullet("Social / rest"),
-      ...checkLists(2),
-    ],
-    [
-      h3("Sunday"),
-      bullet("Meal prep or planning"),
-      bullet("Preview next week"),
-      ...checkLists(2),
-    ]
-  ),
-  divider(),
-  ...section("End of week review", [
+  toggle("End of week review", [
     h3("What went well?"),
     quote("Capture 2–3 wins from this week."),
     h3("What should change?"),
@@ -132,19 +123,20 @@ const weeklyPlannerContent: TemplateContent = [
 ];
 
 const classNotesContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Duplicate this page per lecture, or duplicate the Today's lecture section inside one course hub."
   ),
-  columns(
+  columnGroup(
     [
       h3("Course overview"),
       table(
         ["Field", "Details"],
         [
           ["Course", "CS 401 — Machine Learning"],
-          ["Instructor", ""],
+          ["Instructor", "Dr. Smith"],
           ["Semester", "Spring 2026"],
-          ["Office hours", ""],
+          ["Office hours", "Tue 2–4pm · Room 312"],
         ]
       ),
     ],
@@ -153,166 +145,182 @@ const classNotesContent: TemplateContent = [
       table(
         ["Item", "Notes"],
         [
-          ["Date", ""],
-          ["Topic", ""],
-          ["Required reading", ""],
+          ["Date", "March 20, 2026"],
+          ["Topic", "Gradient descent & backpropagation"],
+          ["Required reading", "Ch. 4 — Neural Networks"],
         ]
       ),
     ]
   ),
   divider(),
-  ...section("Key concepts", [
-    numbered("Main idea — explain in your own words"),
-    numbered("Important definition or formula"),
-    numbered("Example or case study from class"),
-    numbered("How this connects to last lecture"),
-  ]),
-  columns(
+  h2("Key concepts"),
+  numbered("Main idea — explain in your own words"),
+  numbered("Important definition or formula"),
+  numbered("Example or case study from class"),
+  numbered("How this connects to last lecture"),
+  divider(),
+  columnGroup(
     [
       h3("Questions to review"),
-      ...checkLists(3),
+      checkItem("Why does learning rate matter?"),
+      checkItem("When does vanishing gradient occur?"),
+      checkItem("Difference between SGD and Adam?"),
     ],
     [
       h3("Assignments & deadlines"),
-      table(
+      databaseTable(
         ["Assignment", "Due date", "Status"],
         [
-          ["Problem set 1", "", "Not started"],
-          ["Lab report", "", "In progress"],
-          ["", "", ""],
-        ]
+          ["Problem set 1", "2026-03-25", "Not started"],
+          ["Lab report", "2026-03-28", "In progress"],
+          ["Midterm prep", "2026-04-05", "Not started"],
+        ],
+        "Status"
       ),
     ]
   ),
-  divider(),
-  ...section("Quick summary", [
+  toggle("Quick summary", [
     quote("Three-sentence summary of today's lecture — great for exam revision."),
   ]),
 ];
 
 const todoListContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Use Today for must-do items, Upcoming for this week, and Waiting on for blocked tasks."
   ),
-  columns(
+  columnGroup(
     [
       h3("Today"),
-      ...checkLists(4),
+      checkItem("Finish presentation slides"),
+      checkItem("Reply to client email"),
+      checkItem("30 min inbox zero"),
+      checkItem("Review pull request"),
     ],
     [
       h3("Upcoming"),
-      ...checkLists(3),
-    ]
-  ),
-  divider(),
-  columns(
+      checkItem("Draft Q2 roadmap"),
+      checkItem("Schedule team retro"),
+      checkItem("Update portfolio site"),
+    ],
     [
       h3("Waiting on"),
       bullet("Blocked by design review — @Alex"),
       bullet("Waiting on client feedback"),
-      ...checkLists(1),
-    ],
-    [
-      h3("Notes & context"),
-      quote("Drop links, decisions, or context so future-you knows what to do."),
+      checkItem("Legal review on contract"),
     ]
   ),
-  callout("yellow", "End-of-day: move unfinished Today items to Upcoming or delete."),
+  divider(),
+  toggle("Notes & context", [
+    quote("Drop links, decisions, or context so future-you knows what to do."),
+    bullet("Design review doc: paste link here"),
+    bullet("Client thread: paste link here"),
+  ]),
+  callout(
+    "yellow",
+    "End-of-day: move unfinished Today items to Upcoming or delete."
+  ),
 ];
 
 const meetingNotesContent: TemplateContent = [
-  intro("Copy this page for each meeting, or reset the sections below after each sync."),
-  columns(
+  callout("blue", "Copy this page for each meeting, or reset the sections below after each sync."),
+  columnGroup(
     [
       h3("Meeting details"),
       table(
         ["Field", "Value"],
         [
-          ["Date", ""],
-          ["Time", ""],
-          ["Location / link", ""],
-          ["Purpose", ""],
+          ["Date", "March 20, 2026"],
+          ["Time", "10:00 – 10:45 AM"],
+          ["Location / link", "Zoom · Product sync"],
+          ["Purpose", "Sprint planning & blockers"],
         ]
       ),
     ],
     [
       h3("Attendees"),
-      bullet("You"),
-      bullet("Teammate"),
-      bullet("Stakeholder"),
-      p(""),
+      bullet("You · Product"),
+      bullet("Alex · Engineering"),
+      bullet("Sam · Design"),
+      bullet("Jordan · Stakeholder"),
     ]
   ),
   divider(),
-  ...section("Agenda", [
-    numbered("Status updates (5 min)"),
-    numbered("Main discussion topic"),
-    numbered("Decisions needed"),
-    numbered("Next steps & owners"),
-  ]),
-  columns(
+  h2("Agenda"),
+  numbered("Status updates (5 min)"),
+  numbered("Main discussion topic"),
+  numbered("Decisions needed"),
+  numbered("Next steps & owners"),
+  divider(),
+  columnGroup(
     [
       h3("Discussion notes"),
       quote("Capture key points, questions raised, and context — not a full transcript."),
+      bullet("Launch date confirmed for April 14"),
+      bullet("Need design sign-off on onboarding flow"),
     ],
     [
       h3("Decisions made"),
-      callout("green", "Decision 1 — what was agreed and why."),
-      callout("green", "Decision 2 — owner and deadline."),
+      callout("green", "Decision 1 — Ship MVP with core onboarding only."),
+      callout("green", "Decision 2 — Alex owns API integration by Friday."),
     ]
   ),
   divider(),
   h2("Action items"),
-  table(
+  databaseTable(
     ["Owner", "Task", "Due date", "Status"],
     [
-      ["You", "Send follow-up email", "Tomorrow", "To do"],
-      ["Alex", "Update spec", "Friday", "In progress"],
-      ["", "", "", ""],
-    ]
+      ["You", "Send follow-up email", "2026-03-21", "Not started"],
+      ["Alex", "Update API spec", "2026-03-22", "In progress"],
+      ["Sam", "Finalize onboarding mocks", "2026-03-24", "In progress"],
+      ["Jordan", "Review comp package", "2026-03-25", "Not started"],
+    ],
+    "Status"
   ),
 ];
 
 const projectPlanContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "One page for scope, timeline, and risks — share with your team and update weekly."
   ),
   quote(
-    "Project summary: what we're building, for whom, and what success looks like in one paragraph."
+    "Project summary: Launch a mobile onboarding flow that reduces drop-off by 30% before end of Q2."
   ),
   divider(),
-  columns(
+  columnGroup(
     [
       h3("Goals"),
       bullet("Launch MVP by end of Q2"),
       bullet("Reduce onboarding time by 30%"),
-      bullet("Hit 500 active users"),
+      bullet("Hit 500 active users in beta"),
     ],
     [
       h3("Success metrics"),
       table(
         ["Metric", "Target", "Current"],
         [
-          ["Activation rate", "40%", ""],
-          ["Weekly active users", "500", ""],
-          ["NPS", "> 40", ""],
+          ["Activation rate", "40%", "28%"],
+          ["Weekly active users", "500", "210"],
+          ["NPS", "> 40", "36"],
         ]
       ),
     ]
   ),
   divider(),
   h2("Milestones"),
-  table(
-    ["Phase", "Deliverable", "Owner", "Due date"],
+  databaseTable(
+    ["Phase", "Deliverable", "Owner", "Due date", "Status"],
     [
-      ["Discovery", "Requirements & user research", "", ""],
-      ["Build", "MVP feature set", "", ""],
-      ["Beta", "Pilot with 10 users", "", ""],
-      ["Launch", "Public release", "", ""],
-    ]
+      ["Discovery", "Requirements & user research", "You", "2026-03-01", "Done"],
+      ["Build", "MVP feature set", "Alex", "2026-04-15", "In progress"],
+      ["Beta", "Pilot with 10 users", "Sam", "2026-05-01", "Not started"],
+      ["Launch", "Public release", "You", "2026-06-15", "Not started"],
+    ],
+    "Status"
   ),
   divider(),
-  columns(
+  columnGroup(
     [
       h3("Resources"),
       table(
@@ -320,7 +328,7 @@ const projectPlanContent: TemplateContent = [
         [
           ["Team", "2 engineers, 1 designer"],
           ["Tools", "Figma, GitHub, Votion"],
-          ["Budget", ""],
+          ["Budget", "$12,000"],
         ]
       ),
     ],
@@ -333,18 +341,19 @@ const projectPlanContent: TemplateContent = [
 ];
 
 const studyPlannerContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Rate topic confidence 1–5, then schedule more time on weak areas before the exam."
   ),
-  columns(
+  columnGroup(
     [
       h3("Exam details"),
       table(
         ["Field", "Details"],
         [
-          ["Subject", ""],
-          ["Date", ""],
-          ["Format", "Written / MCQ / Practical"],
+          ["Subject", "Data Structures & Algorithms"],
+          ["Date", "April 18, 2026"],
+          ["Format", "Written + coding"],
           ["Weight", "40% of final grade"],
         ]
       ),
@@ -354,10 +363,10 @@ const studyPlannerContent: TemplateContent = [
       table(
         ["Topic", "Confidence (1–5)", "Hours planned"],
         [
-          ["Topic 1", "3", "4h"],
-          ["Topic 2", "2", "6h"],
-          ["Topic 3", "4", "2h"],
-          ["Topic 4", "1", "8h"],
+          ["Graphs & BFS/DFS", "2", "6h"],
+          ["Dynamic programming", "1", "8h"],
+          ["Sorting & complexity", "4", "2h"],
+          ["Trees & heaps", "3", "4h"],
         ]
       ),
     ]
@@ -367,122 +376,132 @@ const studyPlannerContent: TemplateContent = [
   table(
     ["Day", "Focus topic", "Method", "Duration"],
     [
-      ["Monday", "Topic 4 — weak area", "Active recall", "2h"],
-      ["Tuesday", "Topic 2", "Practice problems", "1.5h"],
-      ["Wednesday", "Topic 1 & 3", "Summary notes", "2h"],
+      ["Monday", "Dynamic programming", "Active recall", "2h"],
+      ["Tuesday", "Graphs", "Practice problems", "1.5h"],
+      ["Wednesday", "Trees & heaps", "Summary notes", "2h"],
       ["Thursday", "Mixed review", "Past papers", "2h"],
       ["Friday", "Full mock exam", "Timed practice", "3h"],
     ]
   ),
   divider(),
-  columns(
+  columnGroup(
     [
       h3("Practice & resources"),
       bullet("Past exam papers — link or location"),
-      bullet("Flashcards / Anki deck"),
+      bullet("LeetCode list — 20 medium problems"),
       bullet("Office hours — questions to ask"),
     ],
     [
       h3("Pre-exam checklist"),
-      ...checkLists(4),
+      checkItem("Review all weak topics once"),
+      checkItem("Complete 2 timed mocks"),
+      checkItem("Sleep 8h night before"),
+      checkItem("Pack calculator / materials"),
     ]
   ),
 ];
 
 const habitTrackerContent: TemplateContent = [
-  intro(
-    "This habit tracker uses gallery cards for each day. Tap the habit buttons to check them off — just like Notion."
-  ),
   callout(
     "blue",
-    "Switch between This week, This month, and Streak using the view tabs. Add more habits with New → New checkbox."
+    "Tap habit buttons on each day card to check them off — switch views with This week / This month / Streak."
   ),
+  smallText("Track daily habits · Updated today"),
   h2("Habits"),
   galleryDatabase(
     [
       "Date",
       "✍️ Journaling",
       "🏃 Running",
-      "😴 8hrs of sleep",
+      "😴 8hrs sleep",
       "🧘 Meditation",
+      "💧 Water",
     ],
     [
-      ["March 20, 2026", "true", "true", "false", "true"],
-      ["March 21, 2026", "true", "false", "true", "false"],
-      ["March 22, 2026", "false", "true", "true", "true"],
-      ["March 23, 2026", "true", "true", "true", "false"],
-      ["March 24, 2026", "false", "false", "true", "true"],
-      ["March 25, 2026", "true", "true", "false", "true"],
-      ["March 26, 2026", "true", "false", "true", "true"],
-      ["March 27, 2026", "false", "true", "true", "false"],
+      ["March 20, 2026", "true", "true", "false", "true", "true"],
+      ["March 21, 2026", "true", "false", "true", "false", "true"],
+      ["March 22, 2026", "false", "true", "true", "true", "false"],
+      ["March 23, 2026", "true", "true", "true", "false", "true"],
+      ["March 24, 2026", "false", "false", "true", "true", "true"],
+      ["March 25, 2026", "true", "true", "false", "true", "true"],
+      ["March 26, 2026", "true", "false", "true", "true", "false"],
+      ["March 27, 2026", "false", "true", "true", "false", "true"],
+      ["March 28, 2026", "true", "true", "true", "true", "true"],
+      ["March 29, 2026", "true", "false", "false", "true", "true"],
     ]
   ),
   divider(),
-  columns(
+  columnGroup(
     [
       h3("Weekly wins"),
-      callout("green", "What habits felt easier this week?"),
+      callout("green", "Running felt easier — kept the 7am slot 4 days this week."),
     ],
     [
       h3("Adjust for next week"),
-      callout("yellow", "What got in the way? One small change to try."),
+      callout("yellow", "Meditation slipped on busy days — try 5 min before bed instead."),
     ]
   ),
 ];
 
 const jobTrackerContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Track every application in one pipeline — update status after each email or interview."
   ),
   h2("Application pipeline"),
-  table(
+  databaseTable(
     ["Company", "Role", "Applied", "Status", "Next step"],
     [
-      ["Acme Corp", "Frontend Engineer", "Jan 12", "Interview", "Technical round Fri"],
-      ["Northwind", "Product Designer", "Jan 8", "Applied", "Follow up in 1 week"],
-      ["Globex", "Full-stack Dev", "Jan 15", "Offer", "Review comp package"],
-      ["", "", "", "", ""],
-    ]
+      ["Acme Corp", "Frontend Engineer", "2026-01-12", "Interview", "Technical round Fri"],
+      ["Northwind", "Product Designer", "2026-01-08", "In progress", "Follow up in 1 week"],
+      ["Globex", "Full-stack Dev", "2026-01-15", "Done", "Review comp package"],
+      ["Initech", "Software Engineer", "2026-01-20", "Not started", "Submit take-home"],
+      ["Umbrella Co", "React Developer", "2026-01-18", "Blocked", "Waiting on recruiter"],
+    ],
+    "Status"
   ),
   divider(),
-  columns(
+  columnGroup(
     [
       h3("Interview prep"),
       table(
         ["Company", "Round", "Date", "Notes"],
         [
-          ["Acme Corp", "Technical", "", "Review React + system design"],
-          ["", "Behavioural", "", "Prepare STAR stories"],
+          ["Acme Corp", "Technical", "2026-03-22", "Review React + system design"],
+          ["Acme Corp", "Behavioural", "2026-03-25", "Prepare STAR stories"],
+          ["Northwind", "Portfolio review", "2026-03-28", "Walk through 2 case studies"],
         ]
       ),
     ],
     [
       h3("Follow-ups"),
-      ...checkLists(3),
-      bullet("Thank-you email template saved in Notes"),
+      checkItem("Thank-you email to Acme recruiter"),
+      checkItem("Send portfolio link to Northwind"),
+      checkItem("Update CV with latest project"),
+      bullet("Referrals: @Jamie at Globex, @Priya at Initech"),
     ]
   ),
-  divider(),
-  ...section("Resources", [
+  toggle("Resources", [
     bullet("CV version: v3 — tailored for frontend roles"),
     bullet("Portfolio: yoursite.com"),
-    bullet("Referrals: list people who can intro you"),
+    bullet("Salary target: €65k – €75k"),
   ]),
 ];
 
 const monthlyBudgetContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Update Spent weekly. Remaining = Budget − Spent. Adjust categories that drift off plan."
   ),
-  columns(
+  columnGroup(
     [
       h3("Income this month"),
       table(
         ["Source", "Expected", "Actual"],
         [
-          ["Salary", "$4,200", ""],
-          ["Freelance", "$800", ""],
-          ["Other", "$0", ""],
+          ["Salary", "$4,200", "$4,200"],
+          ["Freelance", "$800", "$650"],
+          ["Other", "$0", "$0"],
         ]
       ),
     ],
@@ -491,9 +510,9 @@ const monthlyBudgetContent: TemplateContent = [
       table(
         ["", "Amount"],
         [
-          ["Total income", "$5,000"],
-          ["Total spent", ""],
-          ["Remaining", ""],
+          ["Total income", "$4,850"],
+          ["Total spent", "$2,910"],
+          ["Remaining", "$1,940"],
         ]
       ),
     ]
@@ -508,7 +527,7 @@ const monthlyBudgetContent: TemplateContent = [
       ["Transport", "$150", "$120", "$30"],
       ["Subscriptions", "$80", "$65", "$15"],
       ["Entertainment", "$200", "$140", "$60"],
-      ["Savings", "$800", "", "$800"],
+      ["Savings", "$800", "$800", "$0"],
     ]
   ),
   divider(),
@@ -516,96 +535,81 @@ const monthlyBudgetContent: TemplateContent = [
   table(
     ["Week", "On track?", "Biggest spend", "Notes"],
     [
-      ["Week 1", "Yes", "Groceries", ""],
-      ["Week 2", "", "", ""],
+      ["Week 1", "Yes", "Groceries", "Under budget on dining out"],
+      ["Week 2", "Yes", "Transport", "Extra taxi rides"],
       ["Week 3", "", "", ""],
       ["Week 4", "", "", ""],
     ]
   ),
-  callout("yellow", "Adjustment: move unused entertainment budget to savings if under-spent."),
+  callout(
+    "yellow",
+    "Adjustment: move unused entertainment budget to savings if under-spent."
+  ),
 ];
 
 const taskDatabaseContent: TemplateContent = [
-  intro(
-    "Your team task board — filter by status or owner. Add rows with + Row on the table."
+  callout(
+    "blue",
+    "Team task board — switch to Board view to drag by status, or filter with the toolbar."
   ),
   h2("All tasks"),
   databaseTable(
     ["Name", "Status", "Owner", "Due date", "Priority"],
     [
-      ["Design homepage", "In progress", "Sam", "Friday", "High"],
-      ["Write API docs", "Not started", "Alex", "Next Mon", "Medium"],
-      ["Fix checkout bug", "Blocked", "Jordan", "ASAP", "High"],
-      ["Review analytics", "Done", "You", "Today", "Low"],
-      ["", "", "", "", ""],
-    ]
+      ["Design homepage", "In progress", "Sam", "2026-03-22", "High"],
+      ["Write API docs", "Not started", "Alex", "2026-03-24", "Medium"],
+      ["Fix checkout bug", "Blocked", "Jordan", "2026-03-21", "High"],
+      ["Review analytics", "Done", "You", "2026-03-20", "Low"],
+      ["Ship onboarding v2", "In progress", "You", "2026-03-28", "High"],
+      ["Update changelog", "Not started", "Alex", "2026-03-25", "Low"],
+    ],
+    "Status"
   ),
   divider(),
-  columns(
-    [
-      h3("By status"),
-      table(
-        ["Status", "Count", "Tasks"],
-        [
-          ["In progress", "2", "Design homepage, …"],
-          ["Blocked", "1", "Fix checkout bug"],
-          ["Done", "1", "Review analytics"],
-        ]
-      ),
-    ],
+  columnGroup(
     [
       h3("Due this week"),
       table(
         ["Task", "Owner", "Due"],
         [
-          ["Design homepage", "Sam", "Friday"],
+          ["Design homepage", "Sam", "Fri"],
+          ["Fix checkout bug", "Jordan", "ASAP"],
           ["Review analytics", "You", "Today"],
-          ["", "", ""],
         ]
       ),
+    ],
+    [
+      h3("Blocked"),
+      bullet("Fix checkout bug — waiting on payment API"),
+      bullet("Legal review — contract template"),
     ]
   ),
 ];
 
 const readingListContent: TemplateContent = [
-  intro(
+  callout(
+    "blue",
     "Move books between sections as you progress. Add key takeaways when you finish."
   ),
-  columns(
+  h2("Library"),
+  databaseTable(
+    ["Title", "Author", "Status", "Rating", "Notes"],
     [
-      h3("Currently reading"),
-      table(
-        ["Title", "Author", "Progress"],
-        [
-          ["Atomic Habits", "James Clear", "45%"],
-          ["", "", ""],
-        ]
-      ),
+      ["Atomic Habits", "James Clear", "In progress", "—", "45% through"],
+      ["Deep Work", "Cal Newport", "Not started", "—", "Focus strategies"],
+      ["Thinking, Fast and Slow", "Daniel Kahneman", "Done", "4", "Bias awareness"],
+      ["The Pragmatic Programmer", "Hunt & Thomas", "Not started", "—", "Career growth"],
+      ["Project Hail Mary", "Andy Weir", "In progress", "—", "Sci-fi break"],
     ],
-    [
-      h3("Want to read"),
-      table(
-        ["Title", "Author", "Why"],
-        [
-          ["Deep Work", "Cal Newport", "Focus strategies"],
-          ["The Pragmatic Programmer", "Hunt & Thomas", "Career growth"],
-          ["", "", ""],
-        ]
-      ),
-    ]
+    "Status"
   ),
   divider(),
-  h2("Finished"),
-  table(
-    ["Title", "Author", "Rating", "Key takeaway"],
-    [
-      ["Thinking, Fast and Slow", "Daniel Kahneman", "★★★★☆", "Bias awareness in decisions"],
-      ["", "", "", ""],
-    ]
-  ),
-  divider(),
-  ...section("Reading notes", [
+  toggle("Reading notes", [
     quote("Quotes, ideas, and links worth revisiting — one block per book."),
+    h3("Atomic Habits"),
+    bullet("1% improvements compound — focus on systems not goals"),
+    h3("Thinking, Fast and Slow"),
+    bullet("System 1 vs System 2 — watch for anchoring bias"),
   ]),
 ];
 
@@ -628,7 +632,7 @@ export const documentTemplates: DocumentTemplate[] = [
     featured: true,
     sourceUrl: PERSONAL_FINANCE_TRACKER_SOURCE,
     description:
-      "Monthly savings table plus side-by-side income and expense ledgers.",
+      "Gallery savings overview plus side-by-side income and expense ledgers.",
     content: personalFinanceTrackerContent,
   },
   {
@@ -638,7 +642,7 @@ export const documentTemplates: DocumentTemplate[] = [
     category: "productivity",
     featured: true,
     description:
-      "Today, upcoming, and waiting-on columns with end-of-day cleanup prompts.",
+      "Notion-style 3-column task board with Today, Upcoming, and Waiting on sections.",
     content: todoListContent,
   },
   {
@@ -693,7 +697,7 @@ export const documentTemplates: DocumentTemplate[] = [
     icon: "💼",
     category: "work",
     description:
-      "Full hiring pipeline with interview prep and follow-up tracking.",
+      "Kanban pipeline with interview prep, follow-ups, and collapsible resources.",
     content: jobTrackerContent,
   },
   {
@@ -720,7 +724,7 @@ export const documentTemplates: DocumentTemplate[] = [
     icon: "📖",
     category: "personal",
     description:
-      "Reading queue, finished log with ratings, and notes section.",
+      "Board view library with status, ratings, and expandable reading notes.",
     content: readingListContent,
   },
 ];

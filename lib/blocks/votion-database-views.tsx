@@ -11,6 +11,7 @@ import {
   getDetailColumns,
   getFilteredRowEntries,
   isTruthy,
+  parseFlexibleDate,
   sortRowEntries,
 } from "@/lib/blocks/votion-database-utils";
 
@@ -463,6 +464,301 @@ export const DatabaseGalleryView = ({
           </button>
         )}
       </div>
+    </div>
+  );
+};
+
+const getTitleColumn = (data: TableData) => {
+  const titleColumn =
+    (data.galleryCardColumnId
+      ? data.columns.find((column) => column.id === data.galleryCardColumnId)
+      : undefined) ??
+    data.columns.find((column) => column.name.toLowerCase() === "name") ??
+    data.columns.find((column) => column.type === "text") ??
+    data.columns[0];
+
+  return titleColumn;
+};
+
+const getDateColumn = (data: TableData) => {
+  return (
+    (data.calendarDateColumnId
+      ? data.columns.find((column) => column.id === data.calendarDateColumnId)
+      : undefined) ??
+    data.columns.find((column) => column.name.toLowerCase() === "date") ??
+    data.columns.find((column) => column.type === "date")
+  );
+};
+
+type DatabaseViewProps = {
+  data: TableData;
+  editable: boolean;
+  onUpdate: (next: TableData) => void;
+};
+
+export const DatabaseListView = ({ data, editable, onUpdate }: DatabaseViewProps) => {
+  const activeTab = getActiveViewTab(data);
+  const titleColumn = getTitleColumn(data);
+  const detailColumns = getDetailColumns(data, data.groupByColumnId);
+  const entries = sortRowEntries(
+    data,
+    getFilteredRowEntries(data, activeTab.filterPreset)
+  );
+
+  const updateCell = (rowIndex: number, columnId: string, value: string) => {
+    const rows = data.rows.map((row, index) =>
+      index === rowIndex ? { ...row, [columnId]: value } : row
+    );
+    onUpdate({ ...data, rows });
+  };
+
+  const addRow = () => {
+    onUpdate({
+      ...data,
+      rows: [...data.rows, createEmptyRow(data)],
+    });
+  };
+
+  return (
+    <div className="votion-list-view" contentEditable={false}>
+      {entries.map(({ row, rowIndex }) => (
+        <div key={`list-${rowIndex}`} className="votion-list-row">
+          <div className="votion-list-row-main">
+            <span className="votion-list-title">
+              {titleColumn ? row[titleColumn.id]?.trim() || "Untitled" : "Untitled"}
+            </span>
+            <div className="votion-list-meta">
+              {detailColumns.slice(0, 3).map((column) => (
+                <span key={column.id} className="votion-list-meta-item">
+                  {column.name}: {row[column.id] || "—"}
+                </span>
+              ))}
+            </div>
+          </div>
+          {editable && (
+            <div className="votion-list-row-fields">
+              {data.columns.slice(0, 4).map((column) => (
+                <label key={column.id} className="votion-list-field">
+                  <span>{column.name}</span>
+                  <TableCellInput
+                    column={column}
+                    value={row[column.id] ?? ""}
+                    editable={editable}
+                    onChange={(value) => updateCell(rowIndex, column.id, value)}
+                  />
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+      {editable && (
+        <button type="button" className="votion-list-new" onClick={addRow}>
+          + New
+        </button>
+      )}
+    </div>
+  );
+};
+
+export const DatabaseFeedView = ({ data, editable, onUpdate }: DatabaseViewProps) => {
+  const activeTab = getActiveViewTab(data);
+  const titleColumn = getTitleColumn(data);
+  const detailColumns = getDetailColumns(data, data.groupByColumnId);
+  const entries = sortRowEntries(
+    data,
+    getFilteredRowEntries(data, activeTab.filterPreset)
+  );
+
+  const updateCell = (rowIndex: number, columnId: string, value: string) => {
+    const rows = data.rows.map((row, index) =>
+      index === rowIndex ? { ...row, [columnId]: value } : row
+    );
+    onUpdate({ ...data, rows });
+  };
+
+  const addRow = () => {
+    onUpdate({
+      ...data,
+      rows: [...data.rows, createEmptyRow(data)],
+    });
+  };
+
+  return (
+    <div className="votion-feed-view" contentEditable={false}>
+      {entries.map(({ row, rowIndex }) => (
+        <article key={`feed-${rowIndex}`} className="votion-feed-card">
+          <h4>{titleColumn ? row[titleColumn.id]?.trim() || "Untitled" : "Untitled"}</h4>
+          <div className="votion-feed-body">
+            {detailColumns.map((column) => (
+              <p key={column.id}>
+                <strong>{column.name}:</strong>{" "}
+                {editable ? (
+                  <TableCellInput
+                    column={column}
+                    value={row[column.id] ?? ""}
+                    editable={editable}
+                    onChange={(value) => updateCell(rowIndex, column.id, value)}
+                  />
+                ) : (
+                  row[column.id] || "—"
+                )}
+              </p>
+            ))}
+          </div>
+        </article>
+      ))}
+      {editable && (
+        <button type="button" className="votion-feed-new" onClick={addRow}>
+          + New
+        </button>
+      )}
+    </div>
+  );
+};
+
+export const DatabaseDashboardView = ({ data }: { data: TableData }) => {
+  const entries = getFilteredRowEntries(data);
+  const checkboxColumns = getCheckboxColumns(data);
+  const completedRows = entries.filter(({ row }) =>
+    checkboxColumns.length > 0
+      ? checkboxColumns.every((column) => isTruthy(row[column.id] ?? ""))
+      : false
+  ).length;
+
+  const cards = [
+    { label: "Total rows", value: String(entries.length) },
+    { label: "Columns", value: String(data.columns.length) },
+    {
+      label: "Completed",
+      value: checkboxColumns.length > 0 ? String(completedRows) : "—",
+    },
+    {
+      label: "Completion rate",
+      value:
+        checkboxColumns.length > 0 && entries.length > 0
+          ? `${Math.round((completedRows / entries.length) * 100)}%`
+          : "—",
+    },
+  ];
+
+  return (
+    <div className="votion-dashboard-view" contentEditable={false}>
+      {cards.map((card) => (
+        <div key={card.label} className="votion-dashboard-card">
+          <p>{card.label}</p>
+          <strong>{card.value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const DatabaseCalendarView = ({ data, editable, onUpdate }: DatabaseViewProps) => {
+  const dateColumn = getDateColumn(data);
+  const titleColumn = getTitleColumn(data);
+  const entries = sortRowEntries(data, getFilteredRowEntries(data));
+
+  if (!dateColumn) {
+    return (
+      <p className="votion-board-empty" contentEditable={false}>
+        Add a date column to use calendar view.
+      </p>
+    );
+  }
+
+  const grouped = new Map<string, { row: Record<string, string>; rowIndex: number }[]>();
+
+  entries.forEach(({ row, rowIndex }) => {
+    const parsed = parseFlexibleDate(row[dateColumn.id] ?? "");
+    const key = parsed
+      ? parsed.toLocaleDateString(undefined, {
+          weekday: "short",
+          month: "short",
+          day: "numeric",
+        })
+      : "No date";
+    const bucket = grouped.get(key) ?? [];
+    bucket.push({ row, rowIndex });
+    grouped.set(key, bucket);
+  });
+
+  const updateCell = (rowIndex: number, columnId: string, value: string) => {
+    const rows = data.rows.map((row, index) =>
+      index === rowIndex ? { ...row, [columnId]: value } : row
+    );
+    onUpdate({ ...data, rows });
+  };
+
+  return (
+    <div className="votion-calendar-view" contentEditable={false}>
+      {Array.from(grouped.entries()).map(([day, items]) => (
+        <div key={day} className="votion-calendar-day">
+          <div className="votion-calendar-day-header">{day}</div>
+          {items.map(({ row, rowIndex }) => (
+            <div key={`${day}-${rowIndex}`} className="votion-calendar-item">
+              <span>{titleColumn ? row[titleColumn.id]?.trim() || "Untitled" : "Untitled"}</span>
+              {editable && (
+                <TableCellInput
+                  column={dateColumn}
+                  value={row[dateColumn.id] ?? ""}
+                  editable={editable}
+                  onChange={(value) => updateCell(rowIndex, dateColumn.id, value)}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export const DatabaseTimelineView = ({ data, editable, onUpdate }: DatabaseViewProps) => {
+  const dateColumn = getDateColumn(data);
+  const titleColumn = getTitleColumn(data);
+  const entries = sortRowEntries(data, getFilteredRowEntries(data)).sort((left, right) => {
+    if (!dateColumn) return 0;
+    const leftDate = parseFlexibleDate(left.row[dateColumn.id] ?? "")?.getTime() ?? 0;
+    const rightDate = parseFlexibleDate(right.row[dateColumn.id] ?? "")?.getTime() ?? 0;
+    return leftDate - rightDate;
+  });
+
+  if (!dateColumn) {
+    return (
+      <p className="votion-board-empty" contentEditable={false}>
+        Add a date column to use timeline view.
+      </p>
+    );
+  }
+
+  const updateCell = (rowIndex: number, columnId: string, value: string) => {
+    const rows = data.rows.map((row, index) =>
+      index === rowIndex ? { ...row, [columnId]: value } : row
+    );
+    onUpdate({ ...data, rows });
+  };
+
+  return (
+    <div className="votion-timeline-view" contentEditable={false}>
+      {entries.map(({ row, rowIndex }) => (
+        <div key={`timeline-${rowIndex}`} className="votion-timeline-row">
+          <div className="votion-timeline-date">
+            {row[dateColumn.id]?.trim() || "No date"}
+          </div>
+          <div className="votion-timeline-bar">
+            <span>{row[titleColumn.id]?.trim() || "Untitled"}</span>
+            {editable && (
+              <TableCellInput
+                column={dateColumn}
+                value={row[dateColumn.id] ?? ""}
+                editable={editable}
+                onChange={(value) => updateCell(rowIndex, dateColumn.id, value)}
+              />
+            )}
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

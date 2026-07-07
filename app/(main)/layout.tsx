@@ -7,6 +7,7 @@ import { Spinner } from "@/components/spinner";
 import { SearchCommand } from "@/components/search-command";
 import { PageLinkPicker } from "@/components/page-link-picker";
 import { MoveToPicker } from "@/components/move-to-picker";
+import { SidePeekPanel } from "@/components/side-peek-panel";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 
 import { Navigation } from "./_components/navigation";
@@ -34,6 +35,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         <SearchCommand />
         <PageLinkPicker />
         <MoveToPicker />
+        <SidePeekPanel />
         {children}
       </main>
     </div>

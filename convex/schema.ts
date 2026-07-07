@@ -15,6 +15,7 @@ export default defineSchema({
     isLocked: v.optional(v.boolean()),
     isFullWidth: v.optional(v.boolean()),
     isSmallText: v.optional(v.boolean()),
+    isHiddenFromRecent: v.optional(v.boolean()),
     sortOrder: v.optional(v.number()),
     updatedAt: v.optional(v.number()),
   })

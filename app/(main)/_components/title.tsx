@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMutation } from "convex/react";
 
 import { Doc } from "@/convex/_generated/dataModel";
@@ -9,6 +9,7 @@ import { PLACEHOLDER_TITLE } from "@/lib/templates";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePageActions } from "@/hooks/use-page-actions";
 
 interface TitleProps {
   initialData: Doc<"documents">;
@@ -20,6 +21,20 @@ export const Title = ({ initialData }: TitleProps) => {
 
   const [title, setTitle] = useState(initialData.title || PLACEHOLDER_TITLE);
   const [isEditing, setIsEditing] = useState(false);
+  const renameDocumentId = usePageActions((store) => store.renameDocumentId);
+  const clearRename = usePageActions((store) => store.clearRename);
+
+  useEffect(() => {
+    if (renameDocumentId !== initialData._id) return;
+
+    setTitle(initialData.title);
+    setIsEditing(true);
+    setTimeout(() => {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }, 0);
+    clearRename();
+  }, [renameDocumentId, initialData._id, initialData.title, clearRename]);
 
   const enableInput = () => {
     setTitle(initialData.title);

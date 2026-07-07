@@ -90,8 +90,42 @@ body,
   line-height: 1.5;
 }
 
+/* Notion does not show nested block guide lines — remove BlockNote defaults */
+.votion-editor [data-node-type="blockGroup"] > [data-node-type="block-outer"]::before {
+  display: none !important;
+  content: none !important;
+}
+
+.votion-editor [data-node-type="blockGroup"] [data-node-type="blockGroup"] {
+  margin-left: 0 !important;
+}
+
+.votion-editor
+  [data-node-type="blockGroup"]
+  [data-node-type="blockGroup"]
+  > [data-node-type="block-outer"] {
+  margin-left: 1.625rem;
+}
+
+/* Columns: no extra nested guides or borders — clean side-by-side layout */
+.votion-editor
+  [data-content-type="votionColumnList"]
+  ~ [data-node-type="blockGroup"]
+  [data-node-type="blockGroup"] {
+  margin-left: 0 !important;
+}
+
+.votion-editor
+  [data-content-type="votionColumnList"]
+  ~ [data-node-type="blockGroup"]
+  [data-node-type="blockGroup"]
+  > [data-node-type="block-outer"] {
+  margin-left: 0 !important;
+}
+
 .votion-editor .bn-block-group .bn-block-outer:not([data-prev-depth-change="-2"]):before {
-  border-radius: 4px;
+  display: none !important;
+  content: none !important;
 }
 
 /* Notion callouts — same subtle background for every color */
@@ -259,7 +293,8 @@ body,
   cursor: default;
 }
 
-.votion-editor .bn-block:has(> [data-content-type="votionToggle"][data-open="false"]) > .bn-block-group {
+.votion-editor [data-content-type="votionToggle"]:has(.votion-toggle[data-open="false"])
+  ~ [data-node-type="blockGroup"] {
   display: none;
 }
 
@@ -679,6 +714,233 @@ body,
   flex-wrap: wrap;
 }
 
+.votion-db-view-picker {
+  position: relative;
+}
+
+.votion-db-view-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.8rem;
+  padding: 0.25rem 0.45rem;
+  cursor: pointer;
+}
+
+.votion-db-view-trigger:hover,
+.votion-db-view-picker.open .votion-db-view-trigger {
+  background: hsl(var(--muted) / 0.45);
+  color: hsl(var(--foreground));
+}
+
+.votion-db-view-menu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 40;
+  width: 22rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  background: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  box-shadow: 0 12px 32px rgba(15, 15, 15, 0.18);
+  padding: 0.35rem;
+}
+
+.votion-db-view-menu-label {
+  margin: 0;
+  padding: 0.35rem 0.5rem 0.25rem;
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-db-view-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1rem;
+  padding: 0.15rem;
+}
+
+.votion-db-view-option {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  width: 100%;
+  border: none;
+  border-radius: 0.35rem;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  padding: 0.38rem 0.45rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.votion-db-view-option span:first-of-type {
+  flex: 1;
+}
+
+.votion-db-view-option:hover,
+.votion-db-view-option.active {
+  background: hsl(var(--muted) / 0.55);
+}
+
+.votion-db-view-option.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.votion-db-view-badge {
+  flex: none !important;
+  font-size: 0.62rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.15rem 0.35rem;
+  border-radius: 999px;
+  background: #2383e2;
+  color: white;
+}
+
+.votion-db-view-menu-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid hsl(var(--border));
+  margin-top: 0.25rem;
+  padding: 0.45rem 0.5rem 0.35rem;
+}
+
+.votion-db-view-menu-footer button {
+  border: none;
+  background: transparent;
+  color: hsl(var(--foreground));
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.votion-db-view-menu-footer span {
+  font-size: 0.72rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-list-view,
+.votion-feed-view,
+.votion-calendar-view,
+.votion-timeline-view {
+  padding: 0.65rem;
+}
+
+.votion-list-row,
+.votion-feed-card,
+.votion-calendar-day,
+.votion-timeline-row {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.45rem;
+  background: hsl(var(--background));
+}
+
+.votion-list-row,
+.votion-feed-card {
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.45rem;
+}
+
+.votion-list-title,
+.votion-feed-card h4 {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0 0 0.25rem;
+}
+
+.votion-list-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+
+.votion-list-new,
+.votion-feed-new {
+  border: 1px dashed hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  border-radius: 0.45rem;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.votion-dashboard-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.65rem;
+  padding: 0.65rem;
+}
+
+.votion-dashboard-card {
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.45rem;
+  padding: 0.75rem;
+  background: hsl(var(--muted) / 0.15);
+}
+
+.votion-dashboard-card p {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-dashboard-card strong {
+  font-size: 1.35rem;
+}
+
+.votion-calendar-view {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.65rem;
+}
+
+.votion-calendar-day-header {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
+.votion-calendar-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid hsl(var(--border));
+  font-size: 0.8rem;
+}
+
+.votion-timeline-row {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  margin-bottom: 0.45rem;
+}
+
+.votion-timeline-date {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.votion-timeline-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-left: 3px solid #2383e2;
+  padding-left: 0.65rem;
+}
+
 .votion-db-icon-group {
   display: flex;
   align-items: center;
@@ -922,18 +1184,29 @@ body,
   overflow: hidden;
 }
 
-.votion-editor .bn-block:has(> [data-content-type="votionColumnList"]) > .bn-block-group {
+.votion-editor
+  [data-content-type="votionColumnList"]
+  ~ [data-node-type="blockGroup"] {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-top: 0.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 2rem;
+  margin-left: 0 !important;
+  margin-top: 0.15rem;
 }
 
-.votion-editor .bn-block:has(> [data-content-type="votionColumn"]) {
-  border: 1px solid hsl(var(--border));
-  border-radius: 0.5rem;
-  padding: 0.35rem 0.5rem 0.5rem;
-  min-height: 5rem;
+.votion-editor
+  [data-content-type="votionColumnList"]
+  ~ [data-node-type="blockGroup"]
+  > [data-node-type="block-outer"] {
+  margin-left: 0 !important;
+  min-width: 0;
+}
+
+.votion-editor [data-content-type="votionColumn"] {
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  min-height: 0;
 }
 
 .votion-column-shell {
@@ -941,7 +1214,9 @@ body,
 }
 
 @media (max-width: 768px) {
-  .votion-editor .bn-block:has(> [data-content-type="votionColumnList"]) > .bn-block-group {
+  .votion-editor
+    [data-content-type="votionColumnList"]
+    ~ [data-node-type="blockGroup"] {
     grid-template-columns: 1fr;
   }
 }

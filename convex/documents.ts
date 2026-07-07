@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 
-import { mutation, query, MutationCtx } from "./_generated/server";
+import { mutation, query, MutationCtx, QueryCtx } from "./_generated/server";
 import { Doc, Id } from "./_generated/dataModel";
 
 const MAX_VERSIONS = 20;
@@ -336,6 +336,7 @@ export const update = mutation({
     isLocked: v.optional(v.boolean()),
     isFullWidth: v.optional(v.boolean()),
     isSmallText: v.optional(v.boolean()),
+    isHiddenFromRecent: v.optional(v.boolean()),
     parentDocument: v.optional(v.union(v.id("documents"), v.null())),
   },
   handler: async (ctx, args) => {
@@ -391,6 +392,32 @@ export const update = mutation({
   },
 });
 
+export const touchRecent = mutation({
+  args: { id: v.id("documents") },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const document = await ctx.db.get(args.id);
+
+    if (!document || document.userId !== userId) {
+      throw new Error("Not found");
+    }
+
+    if (document.isHiddenFromRecent) {
+      await ctx.db.patch(args.id, {
+        isHiddenFromRecent: false,
+      });
+    }
+
+    return args.id;
+  },
+});
+
 export const getFavorites = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -437,6 +464,7 @@ export const getRecent = query({
       .collect();
 
     return documents
+      .filter((document) => !document.isHiddenFromRecent)
       .sort(
         (a, b) =>
           (b.updatedAt ?? b._creationTime) - (a.updatedAt ?? a._creationTime)
@@ -742,5 +770,174 @@ export const removeCoverImage = mutation({
     });
 
     return document;
+  },
+});
+
+const collectExportTree = async (
+  ctx: QueryCtx,
+  userId: string,
+  document: Doc<"documents">
+): Promise<
+  {
+    id: Id<"documents">;
+    parentId?: Id<"documents">;
+    title: string;
+    icon?: string;
+    coverImage?: string;
+    content?: string;
+    isFullWidth?: boolean;
+    isSmallText?: boolean;
+    updatedAt?: number;
+  }[]
+> => {
+  const children = sortDocuments(
+    await ctx.db
+      .query("documents")
+      .withIndex("by_user_parent", (q) =>
+        q.eq("userId", userId).eq("parentDocument", document._id)
+      )
+      .filter((q) => q.eq(q.field("isArchived"), false))
+      .collect()
+  );
+
+  const childRecords = (
+    await Promise.all(children.map((child) => collectExportTree(ctx, userId, child)))
+  ).flat();
+
+  return [
+    {
+      id: document._id,
+      parentId: document.parentDocument,
+      title: document.title,
+      icon: document.icon,
+      coverImage: document.coverImage,
+      content: document.content,
+      isFullWidth: document.isFullWidth,
+      isSmallText: document.isSmallText,
+      updatedAt: document.updatedAt,
+    },
+    ...childRecords,
+  ];
+};
+
+export const getExportTree = query({
+  args: {
+    documentId: v.id("documents"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const root = await ctx.db.get(args.documentId);
+
+    if (!root || root.userId !== userId || root.isArchived) {
+      throw new Error("Not found");
+    }
+
+    return collectExportTree(ctx, userId, root);
+  },
+});
+
+export const getWorkspaceExport = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+
+    const documents = sortDocuments(
+      await ctx.db
+        .query("documents")
+        .withIndex("by_user", (q) => q.eq("userId", userId))
+        .filter((q) => q.eq(q.field("isArchived"), false))
+        .collect()
+    );
+
+    return documents.map((document) => ({
+      id: document._id,
+      parentId: document.parentDocument,
+      title: document.title,
+      icon: document.icon,
+      coverImage: document.coverImage,
+      content: document.content,
+      isFullWidth: document.isFullWidth,
+      isSmallText: document.isSmallText,
+      updatedAt: document.updatedAt,
+    }));
+  },
+});
+
+export const importPages = mutation({
+  args: {
+    pages: v.array(
+      v.object({
+        title: v.string(),
+        content: v.optional(v.string()),
+        icon: v.optional(v.string()),
+        coverImage: v.optional(v.string()),
+        isFullWidth: v.optional(v.boolean()),
+        isSmallText: v.optional(v.boolean()),
+        parentIndex: v.optional(v.number()),
+      })
+    ),
+    parentDocument: v.optional(v.id("documents")),
+    rootIndex: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (!identity) {
+      throw new Error("Not authenticated");
+    }
+
+    const userId = identity.subject;
+    const createdIds: Id<"documents">[] = [];
+    const now = Date.now();
+
+    for (let index = 0; index < args.pages.length; index += 1) {
+      const page = args.pages[index];
+      let parentDocument = args.parentDocument;
+
+      if (page.parentIndex !== undefined) {
+        const parentId = createdIds[page.parentIndex];
+        if (!parentId) {
+          throw new Error("Invalid parent reference during import");
+        }
+        parentDocument = parentId;
+      }
+
+      const documentId = await ctx.db.insert("documents", {
+        title: page.title,
+        parentDocument,
+        userId,
+        isArchived: false,
+        isPublished: false,
+        isFavorite: false,
+        isLocked: false,
+        isFullWidth: page.isFullWidth ?? false,
+        isSmallText: page.isSmallText ?? false,
+        sortOrder: now + index,
+        content: page.content,
+        icon: page.icon,
+        coverImage: page.coverImage,
+        updatedAt: now,
+      });
+
+      createdIds.push(documentId);
+    }
+
+    const rootId = createdIds[args.rootIndex];
+    if (!rootId) {
+      throw new Error("Invalid root page index");
+    }
+
+    return { rootId, pageIds: createdIds };
   },
 });

@@ -1,7 +1,9 @@
 import {
   callout,
-  columns,
+  columnGroup,
+  galleryDatabase,
   h2,
+  smallText,
   table,
   type TemplateContent,
 } from "@/lib/template-blocks";
@@ -13,10 +15,11 @@ import {
 export const personalFinanceTrackerContent: TemplateContent = [
   callout(
     "blue",
-    "Track income and expenses by month. Edit any cell, add rows, or type / for tables, columns, and checklists."
+    "Track income and expenses by month. Click any cell to edit, add rows with + New, or switch database views from the toolbar."
   ),
+  smallText("Last updated · Today"),
   h2("Total Savings"),
-  table(
+  galleryDatabase(
     ["Month", "Income", "Expenses", "Net"],
     [
       ["January", "$6,500", "$2,845", "$3,655"],
@@ -33,15 +36,16 @@ export const personalFinanceTrackerContent: TemplateContent = [
       ["December", "$7,000", "$4,000", "$3,000"],
     ]
   ),
-  columns(
+  columnGroup(
     [
       h2("↗ Income"),
       table(
         ["Source", "Amount", "Tags", "Date"],
         [
-          ["Acme Inc.", "$5,000.00", "Salary", "January 9, 2025"],
-          ["Design Agency", "$1,500.00", "Freelance", "January 25, 2025"],
-          ["Brokerage Account", "$500.00", "Investment", "February 1, 2025"],
+          ["Acme Inc.", "$5,000.00", "Salary", "2025-01-09"],
+          ["Design Agency", "$1,500.00", "Freelance", "2025-01-25"],
+          ["Brokerage Account", "$500.00", "Investment", "2025-02-01"],
+          ["Side project", "$350.00", "Freelance", "2025-02-14"],
           ["", "", "", ""],
         ]
       ),
@@ -51,9 +55,10 @@ export const personalFinanceTrackerContent: TemplateContent = [
       table(
         ["Source", "Amount", "Tags", "Date"],
         [
-          ["Joe's Pizza", "$25.00", "Dining Out", "January 3, 2025"],
-          ["Mortgage", "$2,500.00", "Rent/Mortgage", "January 1, 2025"],
-          ["Hydro Inc.", "$120.00", "Utilities", "January 15, 2025"],
+          ["Joe's Pizza", "$25.00", "Dining Out", "2025-01-03"],
+          ["Mortgage", "$2,500.00", "Rent/Mortgage", "2025-01-01"],
+          ["Hydro Inc.", "$120.00", "Utilities", "2025-01-15"],
+          ["Spotify", "$11.99", "Subscriptions", "2025-01-18"],
           ["", "", "", ""],
         ]
       ),

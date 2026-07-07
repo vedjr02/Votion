@@ -33,10 +33,15 @@ const DocumentIdPage = ({ params }: DocumentIdPageProps) => {
   });
 
   const update = useMutation(api.documents.update);
+  const touchRecent = useMutation(api.documents.touchRecent);
 
   useEffect(() => {
     usePageLinkPicker.getState().setParentDocumentId(params.documentId);
   }, [params.documentId]);
+
+  useEffect(() => {
+    touchRecent({ id: params.documentId }).catch(() => undefined);
+  }, [params.documentId, touchRecent]);
 
   const onChange = (content: string) => {
     if (document?.isLocked) return;

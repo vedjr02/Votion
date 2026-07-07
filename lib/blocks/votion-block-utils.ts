@@ -7,7 +7,17 @@ export type TableColumn = {
   options?: string[];
 };
 
-export type TableView = "table" | "board" | "gallery";
+export type TableView =
+  | "table"
+  | "board"
+  | "gallery"
+  | "list"
+  | "feed"
+  | "dashboard"
+  | "calendar"
+  | "timeline"
+  | "map"
+  | "chart";
 
 export type DatabaseViewTab = {
   id: string;
@@ -23,6 +33,7 @@ export type TableData = {
   view: TableView;
   groupByColumnId?: string;
   galleryCardColumnId?: string;
+  calendarDateColumnId?: string;
   filterText?: string;
   sortColumnId?: string;
   sortDirection?: "asc" | "desc";
@@ -163,6 +174,8 @@ export const normalizeTableData = (
         data.groupByColumnId ?? selectColumn?.id ?? columns[0]?.id,
       galleryCardColumnId:
         data.galleryCardColumnId ?? dateColumn?.id ?? columns[0]?.id,
+      calendarDateColumnId:
+        data.calendarDateColumnId ?? dateColumn?.id ?? columns[0]?.id,
       filterText: data.filterText ?? "",
       sortColumnId: data.sortColumnId,
       sortDirection: data.sortDirection ?? "asc",
@@ -212,6 +225,7 @@ export const normalizeTableData = (
       view: defaultView,
       groupByColumnId: statusColumn?.id ?? columns[0]?.id,
       galleryCardColumnId: dateColumn?.id ?? columns[0]?.id,
+      calendarDateColumnId: dateColumn?.id ?? columns[0]?.id,
       filterText: "",
       activeViewTabId: defaultView === "gallery" ? "week" : undefined,
       viewTabs:
@@ -263,6 +277,33 @@ export const kanbanTable = (
     ...data,
     view: "board",
     groupByColumnId: groupColumn?.id ?? data.columns[0]?.id,
+  };
+};
+
+export const withDatabaseView = (data: TableData, view: TableView): TableData => {
+  const dateColumn =
+    data.columns.find((column) => column.name.toLowerCase() === "date") ??
+    data.columns.find((column) => column.type === "date");
+  const selectColumn = data.columns.find((column) => column.type === "select");
+  const titleColumn =
+    data.columns.find((column) => column.name.toLowerCase() === "name") ??
+    data.columns[0];
+
+  return {
+    ...data,
+    view,
+    groupByColumnId:
+      view === "board"
+        ? (data.groupByColumnId ?? selectColumn?.id ?? data.columns[0]?.id)
+        : data.groupByColumnId,
+    galleryCardColumnId:
+      view === "gallery" || view === "feed"
+        ? (data.galleryCardColumnId ?? dateColumn?.id ?? titleColumn?.id)
+        : data.galleryCardColumnId,
+    calendarDateColumnId:
+      view === "calendar" || view === "timeline"
+        ? (data.calendarDateColumnId ?? dateColumn?.id ?? data.columns[0]?.id)
+        : data.calendarDateColumnId,
   };
 };
 
