@@ -31,7 +31,9 @@ export const CheckListItem = createReactBlockSpec({
       />
       <div
         className={
-          block.props.checked ? "flex-1 opacity-60 line-through" : "flex-1"
+          block.props.checked
+            ? "relative flex-1 opacity-60 line-through"
+            : "relative flex-1"
         }
       >
         <InlineContent />

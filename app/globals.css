@@ -117,3 +117,52 @@ body,
 .votion-editor a:hover {
   opacity: 0.85;
 }
+
+/* Notion-style placeholders: light hint when unfocused, blank when typing */
+.votion-editor .blockContent.isEmpty.hasAnchor .inlineContent:before {
+  content: "" !important;
+}
+
+.votion-editor .blockContent.isEmpty:not(.hasAnchor) .inlineContent:before {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.45;
+  font-style: normal;
+  pointer-events: none;
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Write something, or press '/' for commands";
+}
+
+.votion-editor .blockContent[data-content-type="checkListItem"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "To-do";
+}
+
+.votion-editor .blockContent[data-content-type="heading"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Heading";
+}
+
+.votion-editor .blockContent[data-content-type="bulletListItem"].isEmpty:not(.hasAnchor) .inlineContent:before,
+.votion-editor .blockContent[data-content-type="numberedListItem"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "List";
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"][data-background-color="gray"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Empty quote";
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"][data-background-color="blue"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Callout";
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"][data-background-color="yellow"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Note";
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"][data-background-color="green"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Success";
+}
+
+.votion-editor .blockContent[data-content-type="paragraph"][data-background-color="red"].isEmpty:not(.hasAnchor) .inlineContent:before {
+  content: "Warning";
+}

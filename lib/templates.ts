@@ -1,5 +1,7 @@
 import { PartialBlock } from "@blocknote/core";
 
+import { VotionBlockSchema } from "@/lib/block-schema";
+
 export type TemplateCategory =
   | "productivity"
   | "education"
@@ -14,7 +16,7 @@ export type DocumentTemplate = {
   description: string;
   category: TemplateCategory;
   featured?: boolean;
-  content: PartialBlock[];
+  content: PartialBlock<VotionBlockSchema>[];
 };
 
 export const templateCategories: {
@@ -53,7 +55,7 @@ const text = (value: string) => [
   { type: "text" as const, text: value, styles: {} },
 ];
 
-const heading = (value: string, level: 1 | 2 | 3 = 2): PartialBlock => ({
+const heading = (value: string, level: 1 | 2 | 3 = 2): PartialBlock<VotionBlockSchema> => ({
   type: "heading",
   props: {
     level,
@@ -65,7 +67,7 @@ const heading = (value: string, level: 1 | 2 | 3 = 2): PartialBlock => ({
   children: [],
 });
 
-const paragraph = (value: string): PartialBlock => ({
+const paragraph = (value: string): PartialBlock<VotionBlockSchema> => ({
   type: "paragraph",
   props: {
     textAlignment: "left",
@@ -76,7 +78,7 @@ const paragraph = (value: string): PartialBlock => ({
   children: [],
 });
 
-const bullet = (value: string): PartialBlock => ({
+const bullet = (value: string): PartialBlock<VotionBlockSchema> => ({
   type: "bulletListItem",
   props: {
     textAlignment: "left",
@@ -87,7 +89,7 @@ const bullet = (value: string): PartialBlock => ({
   children: [],
 });
 
-const numbered = (value: string): PartialBlock => ({
+const numbered = (value: string): PartialBlock<VotionBlockSchema> => ({
   type: "numberedListItem",
   props: {
     textAlignment: "left",
@@ -95,6 +97,18 @@ const numbered = (value: string): PartialBlock => ({
     textColor: "default",
   },
   content: text(value),
+  children: [],
+});
+
+const checkList = (): PartialBlock<VotionBlockSchema> => ({
+  type: "checkListItem",
+  props: {
+    textAlignment: "left",
+    backgroundColor: "default",
+    textColor: "default",
+    checked: false,
+  },
+  content: [],
   children: [],
 });
 
@@ -230,14 +244,14 @@ export const documentTemplates: DocumentTemplate[] = [
       heading("To-Do List", 1),
       paragraph("Use this page to stay on top of what needs to get done."),
       heading("Today", 2),
-      bullet("Most important task"),
-      bullet("Second priority"),
-      bullet("Quick win"),
+      checkList(),
+      checkList(),
+      checkList(),
       heading("Upcoming", 2),
-      bullet("Task with a deadline"),
-      bullet("Follow up with someone"),
+      checkList(),
+      checkList(),
       heading("Waiting on", 2),
-      bullet("Blocked by someone or something"),
+      checkList(),
       heading("Notes", 2),
       paragraph("Add any extra context here."),
     ],
@@ -445,5 +459,7 @@ export const getTemplatesByCategory = (category: TemplateCategory) =>
 export const getCategoryLabel = (category: TemplateCategory) =>
   templateCategories.find((item) => item.id === category)?.label ?? category;
 
-export const serializeTemplateContent = (content: PartialBlock[]) =>
+export const serializeTemplateContent = (
+  content: PartialBlock<VotionBlockSchema>[]
+) =>
   JSON.stringify(content, null, 2);

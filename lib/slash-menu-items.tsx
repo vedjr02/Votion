@@ -44,41 +44,11 @@ import {
 
 import { VotionBlockSchema, votionBlockSchema } from "@/lib/block-schema";
 import { usePageLinkPicker } from "@/hooks/use-page-link-picker";
-
-type InlineStyleFlags = {
-  bold?: true;
-  italic?: true;
-  underline?: true;
-  strike?: true;
-  code?: true;
-  textColor?: string;
-  backgroundColor?: string;
-};
-
-const text = (value: string, styles: InlineStyleFlags = {}) => [
-  { type: "text" as const, text: value, styles },
-];
-
-const block = (
-  type:
-    | "paragraph"
-    | "heading"
-    | "bulletListItem"
-    | "numberedListItem"
-    | "checkListItem",
-  content: ReturnType<typeof text>,
-  props: Record<string, unknown> = {}
-): PartialBlock<VotionBlockSchema> => ({
-  type,
-  props: {
-    textAlignment: "left",
-    backgroundColor: "default",
-    textColor: "default",
-    ...props,
-  },
-  content,
-  children: [],
-});
+import {
+  blockWithText,
+  emptyBlock,
+  emptyCheckListItems,
+} from "@/lib/editor-blocks";
 
 const isSlashBlock = (editor: BlockNoteEditor<VotionBlockSchema>) => {
   const currentBlock = editor.getTextCursorPosition().block;
@@ -139,7 +109,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Text size={18} />,
     hint: "Plain text paragraph",
     execute: (editor) =>
-      insertOrUpdateBlock(editor, block("paragraph", text("Start writing..."))),
+      insertOrUpdateBlock(editor, emptyBlock("paragraph")),
   },
   {
     name: "Title",
@@ -148,10 +118,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Heading1 size={18} />,
     hint: "Large page title",
     execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("heading", text("Title"), { level: 1 })
-      ),
+      insertOrUpdateBlock(editor, emptyBlock("heading", { level: 1 })),
   },
   {
     name: "Heading 2",
@@ -160,10 +127,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Heading2 size={18} />,
     hint: "Medium section heading",
     execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("heading", text("Heading 2"), { level: 2 })
-      ),
+      insertOrUpdateBlock(editor, emptyBlock("heading", { level: 2 })),
   },
   {
     name: "Heading 3",
@@ -172,10 +136,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Heading3 size={18} />,
     hint: "Small subsection heading",
     execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("heading", text("Heading 3"), { level: 3 })
-      ),
+      insertOrUpdateBlock(editor, emptyBlock("heading", { level: 3 })),
   },
   {
     name: "To-do list",
@@ -184,11 +145,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <CheckSquare size={18} />,
     hint: "Track tasks with checkboxes",
     execute: (editor) =>
-      insertMultipleBlocks(editor, [
-        block("checkListItem", text("First task"), { checked: false }),
-        block("checkListItem", text("Second task"), { checked: false }),
-        block("checkListItem", text("Third task"), { checked: false }),
-      ]),
+      insertMultipleBlocks(editor, emptyCheckListItems(3)),
   },
   {
     name: "Page link",
@@ -208,9 +165,9 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Collapsible section with hidden content",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("heading", text("▸ Toggle heading"), { level: 3 }),
-        block("bulletListItem", text("Hidden detail or sub-item")),
-        block("bulletListItem", text("Another nested point")),
+        emptyBlock("heading", { level: 3 }),
+        emptyBlock("bulletListItem"),
+        emptyBlock("bulletListItem"),
       ]),
   },
   {
@@ -221,8 +178,8 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Create a simple bulleted list",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("bulletListItem", text("List item")),
-        block("bulletListItem", text("List item")),
+        emptyBlock("bulletListItem"),
+        emptyBlock("bulletListItem"),
       ]),
   },
   {
@@ -233,8 +190,8 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Create a numbered list",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("numberedListItem", text("List item")),
-        block("numberedListItem", text("List item")),
+        emptyBlock("numberedListItem"),
+        emptyBlock("numberedListItem"),
       ]),
   },
   {
@@ -246,9 +203,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("Quote text here"), {
-          backgroundColor: "gray",
-        })
+        emptyBlock("paragraph", { backgroundColor: "gray" })
       ),
   },
   {
@@ -260,7 +215,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("────────────"), {
+        blockWithText("paragraph", "────────────", {
           textAlignment: "center",
           backgroundColor: "default",
         })
@@ -273,14 +228,10 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Code2 size={18} />,
     hint: "Capture a code snippet",
     execute: (editor) =>
-      insertMultipleBlocks(editor, [
-        block("paragraph", text("// Write your code here", { code: true }), {
-          backgroundColor: "gray",
-        }),
-        block("paragraph", text("console.log('Hello, Votion');", { code: true }), {
-          backgroundColor: "gray",
-        }),
-      ]),
+      insertOrUpdateBlock(
+        editor,
+        emptyBlock("paragraph", { backgroundColor: "gray" })
+      ),
   },
   {
     name: "Callout",
@@ -291,9 +242,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("💡 Useful tip or important note"), {
-          backgroundColor: "blue",
-        })
+        emptyBlock("paragraph", { backgroundColor: "blue" })
       ),
   },
   {
@@ -305,9 +254,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("⚠️ Warning message"), {
-          backgroundColor: "yellow",
-        })
+        emptyBlock("paragraph", { backgroundColor: "yellow" })
       ),
   },
   {
@@ -319,9 +266,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("✅ Success message"), {
-          backgroundColor: "green",
-        })
+        emptyBlock("paragraph", { backgroundColor: "green" })
       ),
   },
   {
@@ -333,9 +278,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("⛔ Error or blocker"), {
-          backgroundColor: "red",
-        })
+        emptyBlock("paragraph", { backgroundColor: "red" })
       ),
   },
   {
@@ -346,10 +289,10 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Insert a simple table layout",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("paragraph", text("| Column 1 | Column 2 | Column 3 |", { code: true })),
-        block("paragraph", text("| --- | --- | --- |", { code: true })),
-        block("paragraph", text("| Value | Value | Value |", { code: true })),
-        block("paragraph", text("| Value | Value | Value |", { code: true })),
+        blockWithText("paragraph", "| Column 1 | Column 2 | Column 3 |", {}, { code: true }),
+        blockWithText("paragraph", "| --- | --- | --- |", {}, { code: true }),
+        blockWithText("paragraph", "|  |  |  |", {}, { code: true }),
+        blockWithText("paragraph", "|  |  |  |", {}, { code: true }),
       ]),
   },
   {
@@ -360,10 +303,10 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Side-by-side content layout",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("heading", text("Left column"), { level: 3 }),
-        block("paragraph", text("Content for the left side")),
-        block("heading", text("Right column"), { level: 3 }),
-        block("paragraph", text("Content for the right side")),
+        emptyBlock("heading", { level: 3 }),
+        emptyBlock("paragraph"),
+        emptyBlock("heading", { level: 3 }),
+        emptyBlock("paragraph"),
       ]),
   },
   {
@@ -375,7 +318,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("E = mc²"), {
+        emptyBlock("paragraph", {
           textAlignment: "center",
           backgroundColor: "gray",
         })
@@ -387,11 +330,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     group: "Advanced blocks",
     icon: <Link2 size={18} />,
     hint: "Add a link or bookmark",
-    execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("paragraph", text("🔗 Paste a link here"))
-      ),
+    execute: (editor) => insertOrUpdateBlock(editor, emptyBlock("paragraph")),
   },
   {
     name: "Today",
@@ -407,7 +346,10 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
         day: "numeric",
       });
 
-      insertOrUpdateBlock(editor, block("paragraph", text(`📅 ${today}`)));
+      insertOrUpdateBlock(
+        editor,
+        blockWithText("paragraph", `📅 ${today}`)
+      );
     },
   },
   {
@@ -417,12 +359,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     icon: <Type size={18} />,
     hint: "Smaller supporting text",
     execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("paragraph", text("Small text"), {
-          textAlignment: "left",
-        })
-      ),
+      insertOrUpdateBlock(editor, emptyBlock("paragraph")),
   },
   {
     name: "Info box",
@@ -433,9 +370,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("ℹ️ Information"), {
-          backgroundColor: "blue",
-        })
+        emptyBlock("paragraph", { backgroundColor: "blue" })
       ),
   },
   {
@@ -447,9 +382,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("📺 Paste an embed URL (YouTube, Figma, etc.)"), {
-          backgroundColor: "gray",
-        })
+        emptyBlock("paragraph", { backgroundColor: "gray" })
       ),
   },
   {
@@ -461,9 +394,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("🎬 Paste a video link or upload from the toolbar"), {
-          backgroundColor: "gray",
-        })
+        emptyBlock("paragraph", { backgroundColor: "gray" })
       ),
   },
   {
@@ -474,8 +405,8 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     hint: "Save a link with preview",
     execute: (editor) =>
       insertMultipleBlocks(editor, [
-        block("paragraph", text("🔖 Bookmark title"), { backgroundColor: "gray" }),
-        block("paragraph", text("https://example.com")),
+        emptyBlock("paragraph", { backgroundColor: "gray" }),
+        emptyBlock("paragraph"),
       ]),
   },
   {
@@ -487,9 +418,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("📎 Drag a file here or use the image upload in / menu"), {
-          backgroundColor: "gray",
-        })
+        emptyBlock("paragraph", { backgroundColor: "gray" })
       ),
   },
   {
@@ -501,7 +430,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("▶ Click me"), {
+        emptyBlock("paragraph", {
           textAlignment: "center",
           backgroundColor: "blue",
         })
@@ -513,11 +442,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     group: "Advanced blocks",
     icon: <GitBranch size={18} />,
     hint: "Show navigation path",
-    execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("paragraph", text("Home › Section › Page"))
-      ),
+    execute: (editor) => insertOrUpdateBlock(editor, emptyBlock("paragraph")),
   },
   {
     name: "Synced block",
@@ -528,9 +453,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     execute: (editor) =>
       insertOrUpdateBlock(
         editor,
-        block("paragraph", text("🔗 Synced content — edit once, update everywhere"), {
-          backgroundColor: "yellow",
-        })
+        emptyBlock("paragraph", { backgroundColor: "yellow" })
       ),
   },
   {
@@ -549,11 +472,7 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     group: "Inline",
     icon: <Smile size={18} />,
     hint: "Pick an emoji",
-    execute: (editor) =>
-      insertOrUpdateBlock(
-        editor,
-        block("paragraph", text("😀 🎉 ✨ 📝 🚀"))
-      ),
+    execute: (editor) => insertOrUpdateBlock(editor, emptyBlock("paragraph")),
   },
 ];
 
