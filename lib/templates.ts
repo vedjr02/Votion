@@ -2,28 +2,22 @@ import { PartialBlock } from "@blocknote/core";
 
 import { VotionBlockSchema } from "@/lib/block-schema";
 import {
-  weeklyFocusGallery,
-  weeklyScheduleDatabase,
-  weeklyWeekendColumns,
-} from "@/lib/notion-blocks/weekly-planner-data";
-import {
   bullet,
   callout,
   checkLists,
+  columns,
   divider,
   h1,
   h2,
   h3,
   labeledField,
-  notionColumns,
-  notionDatabase,
-  notionGallery,
   numbered,
   p,
   quote,
   section,
-  simpleColumns,
-  simpleDatabase,
+  table,
+  tableWithEmptyRows,
+  twoColumns,
   type TemplateContent,
 } from "@/lib/template-blocks";
 import {
@@ -85,12 +79,27 @@ export const PLACEHOLDER_TITLE = "Untitled";
 
 const weeklyPlannerContent: TemplateContent = [
   h1("Weekly Planner"),
-  callout("blue", "Plan your week with focus cards, a schedule table, and weekend columns."),
-  notionGallery(weeklyFocusGallery),
-  notionDatabase(weeklyScheduleDatabase),
+  callout("blue", "Plan your week with focus tasks, a schedule table, and weekend columns."),
+  h2("This week's focus"),
+  ...checkLists(3),
+  divider(),
+  h2("Weekly schedule"),
+  table(
+    ["Day", "Morning", "Afternoon", "Evening"],
+    [
+      ["Monday", "", "", ""],
+      ["Tuesday", "", "", ""],
+      ["Wednesday", "", "", ""],
+      ["Thursday", "", "", ""],
+      ["Friday", "", "", ""],
+    ]
+  ),
   divider(),
   h2("Weekend"),
-  notionColumns(weeklyWeekendColumns),
+  columns(
+    [h3("Saturday"), ...checkLists(2)],
+    [h3("Sunday"), ...checkLists(2)]
+  ),
   divider(),
   ...section("End of week review", [
     quote(),
@@ -105,20 +114,26 @@ const classNotesContent: TemplateContent = [
   h1("Class Notes"),
   callout("blue"),
   ...section("Course overview", [
-    simpleDatabase("Course overview", ["Field", "Details"], [
-      ["Course", ""],
-      ["Instructor", ""],
-      ["Semester", ""],
-      ["Office hours", ""],
-    ], { icon: "📚" }),
+    table(
+      ["Field", "Details"],
+      [
+        ["Course", ""],
+        ["Instructor", ""],
+        ["Semester", ""],
+        ["Office hours", ""],
+      ]
+    ),
   ]),
   divider(),
   ...section("Today's lecture", [
-    simpleDatabase("Today's lecture", ["Item", "Notes"], [
-      ["Date", ""],
-      ["Topic", ""],
-      ["Reading", ""],
-    ], { icon: "📝" }),
+    table(
+      ["Item", "Notes"],
+      [
+        ["Date", ""],
+        ["Topic", ""],
+        ["Reading", ""],
+      ]
+    ),
   ]),
   ...section("Key concepts", [
     numbered("Main idea from the lecture"),
@@ -127,9 +142,7 @@ const classNotesContent: TemplateContent = [
   ]),
   ...section("Questions to review", checkLists(2)),
   ...section("Assignments & deadlines", [
-    simpleDatabase("Assignments", ["Assignment", "Due date", "Status"], [["", "", ""]], {
-      icon: "📋",
-    }),
+    tableWithEmptyRows(["Assignment", "Due date", "Status"], 3),
   ]),
   ...section("Sources & references", [
     bullet("Textbook chapter or article"),
@@ -152,11 +165,14 @@ const meetingNotesContent: TemplateContent = [
   h1("Meeting Notes"),
   callout("blue"),
   ...section("Details", [
-    simpleDatabase("Meeting details", ["Field", "Value"], [
-      ["Date", ""],
-      ["Attendees", ""],
-      ["Purpose", ""],
-    ], { icon: "📝" }),
+    table(
+      ["Field", "Value"],
+      [
+        ["Date", ""],
+        ["Attendees", ""],
+        ["Purpose", ""],
+      ]
+    ),
   ]),
   divider(),
   ...section("Agenda", [
@@ -167,9 +183,7 @@ const meetingNotesContent: TemplateContent = [
   ...section("Discussion", [quote()]),
   ...section("Decisions", [callout("green"), callout("green")]),
   ...section("Action items", [
-    simpleDatabase("Action items", ["Owner", "Task", "Due date"], [["", "", ""]], {
-      icon: "✅",
-    }),
+    tableWithEmptyRows(["Owner", "Task", "Due date"], 3),
   ]),
 ];
 
@@ -178,19 +192,17 @@ const projectPlanContent: TemplateContent = [
   callout("blue"),
   ...section("Overview", [quote()]),
   divider(),
-  simpleColumns(
-    "Goals",
-    "Success metrics",
-    ["Item", "Notes"],
+  columns(
     [
-      ["Primary goal", ""],
-      ["Secondary goal", ""],
+      h3("Goals"),
+      bullet("Primary goal"),
+      bullet("Secondary goal"),
     ],
     [
-      ["Metric 1", ""],
-      ["Metric 2", ""],
-    ],
-    { leftIcon: "🎯", rightIcon: "📈" }
+      h3("Success metrics"),
+      bullet("Metric 1"),
+      bullet("Metric 2"),
+    ]
   ),
   divider(),
   ...section("Milestones", [
@@ -200,11 +212,14 @@ const projectPlanContent: TemplateContent = [
     numbered("Final delivery"),
   ]),
   ...section("Resources", [
-    simpleDatabase("Resources", ["Type", "Details"], [
-      ["People", ""],
-      ["Tools", ""],
-      ["Budget", ""],
-    ], { icon: "🧰" }),
+    table(
+      ["Type", "Details"],
+      [
+        ["People", ""],
+        ["Tools", ""],
+        ["Budget", ""],
+      ]
+    ),
   ]),
   ...section("Risks & blockers", [callout("yellow"), callout("red")]),
 ];
@@ -213,23 +228,21 @@ const studyPlannerContent: TemplateContent = [
   h1("Study Planner"),
   callout("blue"),
   ...section("Exam / assessment", [
-    simpleDatabase("Exam details", ["Field", "Details"], [
-      ["Subject", ""],
-      ["Date", ""],
-      ["Format", ""],
-    ], { icon: "🎓" }),
+    table(
+      ["Field", "Details"],
+      [
+        ["Subject", ""],
+        ["Date", ""],
+        ["Format", ""],
+      ]
+    ),
   ]),
   divider(),
   ...section("Topics to cover", [
-    simpleDatabase("Topics", ["Topic", "Confidence (1-5)"], [
-      ["", ""],
-      ["", ""],
-      ["", ""],
-    ]),
+    tableWithEmptyRows(["Topic", "Confidence (1-5)"], 3),
   ]),
   ...section("Study schedule", [
-    simpleDatabase(
-      "Study schedule",
+    table(
       ["Day", "Topic", "Duration"],
       [
         ["Monday", "", ""],
@@ -237,8 +250,7 @@ const studyPlannerContent: TemplateContent = [
         ["Wednesday", "", ""],
         ["Thursday", "", ""],
         ["Friday", "Review", ""],
-      ],
-      { tabs: ["This week", "Next week"], icon: "📅" }
+      ]
     ),
   ]),
   ...section("Practice & resources", [
@@ -252,23 +264,17 @@ const habitTrackerContent: TemplateContent = [
   h1("Habit Tracker"),
   callout("blue"),
   ...section("Habits I'm building", [
-    simpleDatabase("Habits", ["Habit", "Why it matters"], [
-      ["", ""],
-      ["", ""],
-      ["", ""],
-    ], { icon: "🌱" }),
+    tableWithEmptyRows(["Habit", "Why it matters"], 3),
   ]),
   divider(),
   ...section("Daily log", [
-    simpleDatabase(
-      "Daily log",
+    table(
       ["Habit", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
       [
         ["Habit 1", "", "", "", "", "", "", ""],
         ["Habit 2", "", "", "", "", "", "", ""],
         ["Habit 3", "", "", "", "", "", "", ""],
-      ],
-      { tabs: ["Week 1", "Week 2", "Week 3", "Week 4"] }
+      ]
     ),
   ]),
   ...section("Reflection", [quote()]),
@@ -278,20 +284,11 @@ const jobTrackerContent: TemplateContent = [
   h1("Job Application Tracker"),
   callout("blue"),
   ...section("Active applications", [
-    simpleDatabase(
-      "Applications",
-      ["Company", "Role", "Applied", "Status"],
-      [
-        ["", "", "", ""],
-        ["", "", "", ""],
-        ["", "", "", ""],
-      ],
-      { icon: "💼", tabs: ["Active", "Interview", "Offer", "Rejected"] }
-    ),
+    tableWithEmptyRows(["Company", "Role", "Applied", "Status"], 4),
   ]),
   divider(),
   ...section("Interview prep", [
-    simpleDatabase("Interviews", ["Company", "Interview date", "Notes"], [["", "", ""]]),
+    tableWithEmptyRows(["Company", "Interview date", "Notes"], 2),
   ]),
   ...section("Follow-ups", checkLists(2)),
   ...section("Resources", [
@@ -304,14 +301,11 @@ const monthlyBudgetContent: TemplateContent = [
   h1("Monthly Budget"),
   callout("blue"),
   ...section("Income plan", [
-    simpleDatabase("Income plan", ["Expected income", "Actual"], [["", ""]], {
-      icon: "💵",
-    }),
+    tableWithEmptyRows(["Expected income", "Actual"], 2),
   ]),
   divider(),
   ...section("Budget by category", [
-    simpleDatabase(
-      "Budget by category",
+    table(
       ["Category", "Budget", "Spent", "Remaining"],
       [
         ["Housing", "", "", ""],
@@ -319,13 +313,11 @@ const monthlyBudgetContent: TemplateContent = [
         ["Transport", "", "", ""],
         ["Entertainment", "", "", ""],
         ["Savings", "", "", ""],
-      ],
-      { sumColumn: "Spent" }
+      ]
     ),
   ]),
   ...section("Weekly check-in", [
-    simpleDatabase(
-      "Weekly check-in",
+    table(
       ["Week", "On track?", "Notes"],
       [
         ["Week 1", "", ""],
@@ -341,71 +333,21 @@ const monthlyBudgetContent: TemplateContent = [
 const taskDatabaseContent: TemplateContent = [
   h1("Task Database"),
   callout("blue"),
-  notionDatabase({
-    title: "All tasks",
-    icon: "🗂️",
-    tabs: ["All", "In progress", "Done"],
-    activeTab: "All",
-    columns: [
-      { id: "name", label: "Name" },
-      { id: "status", label: "Status" },
-      { id: "owner", label: "Owner" },
-      { id: "due", label: "Due date" },
-      { id: "priority", label: "Priority" },
-    ],
-    groups: [
-      {
-        title: "Tasks",
-        rows: [
-          {
-            id: "task-1",
-            cells: {
-              name: "Design homepage",
-              status: "In progress",
-              owner: "",
-              due: "Friday",
-              priority: "High",
-            },
-          },
-          {
-            id: "task-2",
-            cells: {
-              name: "Write documentation",
-              status: "Not started",
-              owner: "",
-              due: "Next week",
-              priority: "Medium",
-            },
-          },
-          {
-            id: "task-3",
-            cells: {
-              name: "Review pull request",
-              status: "Done",
-              owner: "",
-              due: "Today",
-              priority: "Low",
-            },
-          },
-        ],
-      },
-    ],
-  }),
+  table(
+    ["Name", "Status", "Owner", "Due date", "Priority"],
+    [
+      ["Design homepage", "In progress", "", "Friday", "High"],
+      ["Write documentation", "Not started", "", "Next week", "Medium"],
+      ["Review pull request", "Done", "", "Today", "Low"],
+      ["", "", "", "", ""],
+    ]
+  ),
   divider(),
-  simpleColumns(
+  twoColumns(
     "Filter views",
     "Quick actions",
-    ["View", "Description"],
-    [
-      ["All tasks", ""],
-      ["My tasks", ""],
-      ["Due this week", ""],
-    ],
-    [
-      ["Add task", ""],
-      ["Sort by due date", ""],
-      ["Group by status", ""],
-    ]
+    ["All tasks", "My tasks", "Due this week"],
+    ["Add task", "Sort by due date", "Group by status"]
   ),
 ];
 
@@ -413,16 +355,14 @@ const readingListContent: TemplateContent = [
   h1("Reading List"),
   callout("blue"),
   ...section("Currently reading", [
-    simpleDatabase("Currently reading", ["Title", "Author", "Progress"], [["", "", ""]], {
-      icon: "📖",
-    }),
+    tableWithEmptyRows(["Title", "Author", "Progress"], 2),
   ]),
   divider(),
   ...section("Want to read", [
-    simpleDatabase("Want to read", ["Title", "Author", "Why it matters"], [["", "", ""]]),
+    tableWithEmptyRows(["Title", "Author", "Why it matters"], 2),
   ]),
   ...section("Finished", [
-    simpleDatabase("Finished", ["Title", "Author", "Key takeaway"], [["", "", ""]]),
+    tableWithEmptyRows(["Title", "Author", "Key takeaway"], 2),
   ]),
   ...section("Notes", [quote()]),
 ];
@@ -456,7 +396,7 @@ export const documentTemplates: DocumentTemplate[] = [
     featured: true,
     sourceUrl: PERSONAL_FINANCE_TRACKER_SOURCE,
     description:
-      "Notion-style finance dashboard with monthly savings gallery and side-by-side income & expense databases.",
+      "Editable monthly overview table with side-by-side income and expense tables.",
     content: personalFinanceTrackerContent,
   },
   {
@@ -527,7 +467,7 @@ export const documentTemplates: DocumentTemplate[] = [
     icon: "🗂️",
     category: "work",
     description:
-      "Database-style task table with status columns and filter views.",
+      "Editable task table with status columns and two-column quick views.",
     content: taskDatabaseContent,
   },
   {

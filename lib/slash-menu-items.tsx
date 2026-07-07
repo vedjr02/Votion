@@ -49,6 +49,10 @@ import {
   emptyBlock,
   emptyCheckListItems,
 } from "@/lib/editor-blocks";
+import {
+  defaultColumnLayout,
+  defaultTableLayout,
+} from "@/lib/template-blocks";
 
 const isSlashBlock = (editor: BlockNoteEditor<VotionBlockSchema>) => {
   const currentBlock = editor.getTextCursorPosition().block;
@@ -286,28 +290,18 @@ const customSlashMenuItems: ReactSlashMenuItem<VotionBlockSchema>[] = [
     aliases: ["table", "grid", "database", "rows"],
     group: "Advanced blocks",
     icon: <Table size={18} />,
-    hint: "Insert a simple table layout",
+    hint: "Insert an editable table",
     execute: (editor) =>
-      insertMultipleBlocks(editor, [
-        blockWithText("paragraph", "| Column 1 | Column 2 | Column 3 |", {}, { code: true }),
-        blockWithText("paragraph", "| --- | --- | --- |", {}, { code: true }),
-        blockWithText("paragraph", "|  |  |  |", {}, { code: true }),
-        blockWithText("paragraph", "|  |  |  |", {}, { code: true }),
-      ]),
+      insertOrUpdateBlock(editor, defaultTableLayout()),
   },
   {
     name: "2 columns",
     aliases: ["columns", "2col", "split"],
     group: "Advanced blocks",
     icon: <Columns size={18} />,
-    hint: "Side-by-side content layout",
+    hint: "Side-by-side editable columns",
     execute: (editor) =>
-      insertMultipleBlocks(editor, [
-        emptyBlock("heading", { level: 3 }),
-        emptyBlock("paragraph"),
-        emptyBlock("heading", { level: 3 }),
-        emptyBlock("paragraph"),
-      ]),
+      insertOrUpdateBlock(editor, defaultColumnLayout()),
   },
   {
     name: "Equation",

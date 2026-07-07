@@ -2,16 +2,15 @@ import { PartialBlock } from "@blocknote/core";
 
 import { VotionBlockSchema } from "@/lib/block-schema";
 import {
+  stringifyJsonProp,
+  tableData,
+  type TableData,
+} from "@/lib/blocks/votion-block-utils";
+import {
   blockWithText,
   emptyBlock,
   emptyCheckListItems,
 } from "@/lib/editor-blocks";
-import type {
-  NotionColumnsData,
-  NotionDatabaseData,
-  NotionGalleryData,
-} from "@/lib/notion-blocks/types";
-import { stringifyJsonProp } from "@/lib/notion-blocks/types";
 
 export type TemplateBlock = PartialBlock<VotionBlockSchema>;
 export type TemplateContent = TemplateBlock[];
@@ -89,50 +88,56 @@ export const divider = (): TemplateBlock =>
     backgroundColor: "default",
   });
 
-export const tableRow = (...cells: string[]): TemplateBlock =>
-  blockWithText("paragraph", `| ${cells.join(" | ")} |`, {}, { code: true });
-
-export const tableSep = (columns: number): TemplateBlock =>
-  tableRow(...Array.from({ length: columns }, () => "---"));
+export const tableBlock = (data: TableData): TemplateBlock => ({
+  type: "votionTable",
+  props: { ...baseProps, data: stringifyJsonProp(data) },
+  children: [],
+});
 
 export const table = (
   headers: string[],
   rows: string[][] = []
-): TemplateContent => [
-  tableRow(...headers),
-  tableSep(headers.length),
-  ...rows.map((row) =>
-    tableRow(...headers.map((_, index) => row[index] ?? ""))
-  ),
-];
+): TemplateBlock => tableBlock(tableData(headers, rows));
 
 export const tableWithEmptyRows = (
   headers: string[],
   emptyRows = 4
-): TemplateContent => [
-  ...table(
+): TemplateBlock =>
+  table(
     headers,
     Array.from({ length: emptyRows }, () => headers.map(() => ""))
-  ),
-];
+  );
+
+export const columns = (
+  left: TemplateContent,
+  right: TemplateContent
+): TemplateBlock => ({
+  type: "votionColumnList",
+  props: baseProps,
+  children: [
+    {
+      type: "votionColumn",
+      props: baseProps,
+      children: left.map((block) => ({ ...block, children: block.children ?? [] })),
+    },
+    {
+      type: "votionColumn",
+      props: baseProps,
+      children: right.map((block) => ({ ...block, children: block.children ?? [] })),
+    },
+  ],
+});
 
 export const twoColumns = (
   leftTitle: string,
   rightTitle: string,
   leftRows: string[] = [""],
   rightRows: string[] = [""]
-): TemplateContent => {
-  const rowCount = Math.max(leftRows.length, rightRows.length, 1);
-
-  return [
-    h3("Two columns"),
-    tableRow(leftTitle, rightTitle),
-    tableSep(2),
-    ...Array.from({ length: rowCount }, (_, index) =>
-      tableRow(leftRows[index] ?? "", rightRows[index] ?? "")
-    ),
-  ];
-};
+): TemplateBlock =>
+  columns(
+    [h3(leftTitle), ...leftRows.map((row) => (row ? p(row) : p("")))],
+    [h3(rightTitle), ...rightRows.map((row) => (row ? p(row) : p("")))]
+  );
 
 export const section = (
   title: string,
@@ -147,111 +152,17 @@ export const section = (
 
 export const labeledField = (label: string): TemplateBlock => bullet(`${label}`);
 
-export const notionGallery = (data: NotionGalleryData): TemplateBlock => ({
-  type: "notionGallery",
-  props: { ...baseProps, data: stringifyJsonProp(data) },
-  children: [],
-});
+export const defaultColumnLayout = (): TemplateBlock =>
+  columns(
+    [h3("Column 1"), emptyBlock("paragraph")],
+    [h3("Column 2"), emptyBlock("paragraph")]
+  );
 
-export const notionDatabase = (data: NotionDatabaseData): TemplateBlock => ({
-  type: "notionDatabase",
-  props: { ...baseProps, data: stringifyJsonProp(data) },
-  children: [],
-});
-
-export const notionColumns = (data: NotionColumnsData): TemplateBlock => ({
-  type: "notionColumns",
-  props: { ...baseProps, data: stringifyJsonProp(data) },
-  children: [],
-});
-
-const columnId = (label: string) =>
-  label
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_|_$/g, "") || "col";
-
-export const simpleDatabase = (
-  title: string,
-  columns: string[],
-  rows: string[][],
-  options?: {
-    icon?: string;
-    tabs?: string[];
-    groupTitle?: string;
-    sumColumn?: string;
-  }
-): TemplateBlock => {
-  const cols = columns.map((label) => ({ id: columnId(label), label }));
-
-  return notionDatabase({
-    title,
-    icon: options?.icon,
-    tabs: options?.tabs ?? ["All"],
-    activeTab: options?.tabs?.[0],
-    columns: cols,
-    sumColumnId: options?.sumColumn ? columnId(options.sumColumn) : undefined,
-    groups: [
-      {
-        title: options?.groupTitle ?? title,
-        rows: rows.map((cells, index) => ({
-          id: `${columnId(title)}-${index}`,
-          cells: Object.fromEntries(
-            cols.map((col, columnIndex) => [col.id, cells[columnIndex] ?? ""])
-          ),
-        })),
-      },
-    ],
-  });
-};
-
-export const simpleColumns = (
-  leftTitle: string,
-  rightTitle: string,
-  columns: string[],
-  leftRows: string[][],
-  rightRows: string[][],
-  options?: { leftIcon?: string; rightIcon?: string }
-): TemplateBlock =>
-  notionColumns({
-    left: {
-      title: leftTitle,
-      icon: options?.leftIcon,
-      tabs: ["All"],
-      columns: columns.map((label) => ({ id: columnId(label), label })),
-      groups: [
-        {
-          title: leftTitle,
-          rows: leftRows.map((cells, index) => ({
-            id: `left-${index}`,
-            cells: Object.fromEntries(
-              columns.map((label, columnIndex) => [
-                columnId(label),
-                cells[columnIndex] ?? "",
-              ])
-            ),
-          })),
-        },
-      ],
-    },
-    right: {
-      title: rightTitle,
-      icon: options?.rightIcon,
-      tabs: ["All"],
-      columns: columns.map((label) => ({ id: columnId(label), label })),
-      groups: [
-        {
-          title: rightTitle,
-          rows: rightRows.map((cells, index) => ({
-            id: `right-${index}`,
-            cells: Object.fromEntries(
-              columns.map((label, columnIndex) => [
-                columnId(label),
-                cells[columnIndex] ?? "",
-              ])
-            ),
-          })),
-        },
-      ],
-    },
-  });
+export const defaultTableLayout = (): TemplateBlock =>
+  table(
+    ["Column 1", "Column 2", "Column 3"],
+    [
+      ["", "", ""],
+      ["", "", ""],
+    ]
+  );

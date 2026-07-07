@@ -1,16 +1,16 @@
 import { defaultBlockSchema } from "@blocknote/core";
 
 import { CheckListItem } from "@/lib/blocks/checklist-block";
-import { NotionColumns } from "@/lib/blocks/notion-columns-block";
-import { NotionDatabase } from "@/lib/blocks/notion-database-block";
-import { NotionGallery } from "@/lib/blocks/notion-gallery-block";
+import { VotionColumn } from "@/lib/blocks/votion-column-block";
+import { VotionColumnList } from "@/lib/blocks/votion-column-list-block";
+import { VotionTable } from "@/lib/blocks/votion-table-block";
 
 export const votionBlockSchema = {
   ...defaultBlockSchema,
   checkListItem: CheckListItem,
-  notionDatabase: NotionDatabase,
-  notionGallery: NotionGallery,
-  notionColumns: NotionColumns,
+  votionTable: VotionTable,
+  votionColumnList: VotionColumnList,
+  votionColumn: VotionColumn,
 } as const;
 
 export type VotionBlockSchema = typeof votionBlockSchema;
