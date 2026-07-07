@@ -80,6 +80,8 @@ export const callout = (
     ? blockWithText("paragraph", value, { backgroundColor: color })
     : emptyBlock("paragraph", { backgroundColor: color });
 
+export const intro = (value: string): TemplateBlock => callout("blue", value);
+
 export const quote = (value = ""): TemplateBlock => callout("gray", value);
 
 export const divider = (): TemplateBlock =>
@@ -142,12 +144,29 @@ export const twoColumns = (
 export const section = (
   title: string,
   blocks: TemplateContent,
-  level: 1 | 2 | 3 = 2
+  level: 2 | 3 = 2
 ): TemplateContent => {
-  const heading =
-    level === 1 ? h1(title) : level === 3 ? h3(title) : h2(title);
-
+  const heading = level === 3 ? h3(title) : h2(title);
   return [heading, ...blocks];
+};
+
+export const getBlockPlainText = (block: PartialBlock<VotionBlockSchema>): string => {
+  if (!Array.isArray(block.content)) return "";
+
+  return block.content
+    .map((item) => {
+      if (
+        typeof item === "object" &&
+        item !== null &&
+        "text" in item &&
+        typeof item.text === "string"
+      ) {
+        return item.text;
+      }
+      return "";
+    })
+    .join("")
+    .trim();
 };
 
 export const labeledField = (label: string): TemplateBlock => bullet(`${label}`);

@@ -16,7 +16,7 @@ import {
   getCategoryLabel,
   getTemplatesByCategory,
   PLACEHOLDER_TITLE,
-  serializeTemplateContent,
+  serializeTemplateForDocument,
   templateCategories,
   type DocumentTemplate,
 } from "@/lib/templates";
@@ -123,7 +123,7 @@ export const TemplatePicker = ({
     createDocument({
       title: template.title,
       icon: template.icon,
-      content: serializeTemplateContent(template.content),
+      content: serializeTemplateForDocument(template),
     });
   };
 
@@ -142,7 +142,7 @@ export const TemplatePicker = ({
             <p className="text-sm text-muted-foreground">
               {isCompact
                 ? "Preview a layout first, then add it to your workspace."
-                : "Browse Notion-style layouts with tables, callouts, columns, and checklists."}
+                : "Ready-to-use layouts with editable tables, columns, and checklists."}
             </p>
           </div>
           <Button

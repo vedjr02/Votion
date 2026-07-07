@@ -1,7 +1,6 @@
 import {
   callout,
   columns,
-  h1,
   h2,
   table,
   type TemplateContent,
@@ -12,10 +11,9 @@ import {
  * https://notion.notion.site/Personal-Finance-Tracker-901648e0ed924bde8a2b07989a1df039
  */
 export const personalFinanceTrackerContent: TemplateContent = [
-  h1("Personal Finance Tracker"),
   callout(
     "blue",
-    "Track income and expenses by month. Edit any cell, add rows, or use / for more blocks."
+    "Track income and expenses by month. Edit any cell, add rows, or type / for tables, columns, and checklists."
   ),
   h2("Total Savings"),
   table(
@@ -60,6 +58,10 @@ export const personalFinanceTrackerContent: TemplateContent = [
         ]
       ),
     ]
+  ),
+  callout(
+    "yellow",
+    "Tip: Set aside a portion of freelance and side income for tax each month."
   ),
 ];
 
