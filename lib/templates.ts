@@ -1,6 +1,6 @@
 import { PartialBlock } from "@blocknote/core";
 
-import { VotionBlockSchema } from "@/lib/block-schema";
+import type { VotionBlockSchema } from "@/lib/block-schema";
 import {
   bullet,
   callout,

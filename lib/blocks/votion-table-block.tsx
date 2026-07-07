@@ -3,6 +3,7 @@ import { createReactBlockSpec } from "@blocknote/react";
 
 import {
   emptyTable,
+  filterTableRowEntries,
   normalizeTableData,
   stringifyJsonProp,
   type ColumnType,
@@ -143,6 +144,8 @@ const TableView = ({
   editable: boolean;
   onUpdate: (next: TableData) => void;
 }) => {
+  const visibleRows = filterTableRowEntries(data);
+
   const updateHeader = (index: number, name: string) => {
     const columns = [...data.columns];
     columns[index] = { ...columns[index], name };
@@ -207,6 +210,18 @@ const TableView = ({
 
   return (
     <>
+      {editable && (
+        <div className="votion-table-filter" contentEditable={false}>
+          <input
+            type="search"
+            value={data.filterText ?? ""}
+            placeholder="Filter rows..."
+            onChange={(event) =>
+              onUpdate({ ...data, filterText: event.target.value })
+            }
+          />
+        </div>
+      )}
       <div className="votion-table-wrap">
         <table className="votion-table">
           <thead>
@@ -244,7 +259,7 @@ const TableView = ({
             </tr>
           </thead>
           <tbody>
-            {data.rows.map((row, rowIndex) => (
+            {visibleRows.map(({ row, rowIndex }) => (
               <tr key={`row-${rowIndex}`}>
                 {data.columns.map((column) => (
                   <td key={`${rowIndex}-${column.id}`}>
@@ -314,6 +329,7 @@ const BoardView = ({
   const detailColumns = data.columns.filter(
     (column) => column.id !== groupColumn.id
   );
+  const filteredRows = filterTableRowEntries(data);
 
   const updateCell = (rowIndex: number, columnId: string, value: string) => {
     const rows = data.rows.map((row, index) =>
@@ -337,9 +353,22 @@ const BoardView = ({
 
   return (
     <div className="votion-board" contentEditable={false}>
+      {editable && (
+        <div className="votion-table-filter votion-table-filter-board">
+          <input
+            type="search"
+            value={data.filterText ?? ""}
+            placeholder="Filter cards..."
+            onChange={(event) =>
+              onUpdate({ ...data, filterText: event.target.value })
+            }
+          />
+        </div>
+      )}
+      <div className="votion-board-columns">
       {groups.map((group) => {
-        const cards = data.rows.filter(
-          (row) => (row[groupColumn.id]?.trim() || "No status") === group
+        const cards = filteredRows.filter(
+          ({ row }) => (row[groupColumn.id]?.trim() || "No status") === group
         );
 
         return (
@@ -349,10 +378,7 @@ const BoardView = ({
               <span className="votion-board-count">{cards.length}</span>
             </div>
             <div className="votion-board-cards">
-              {cards.map((row) => {
-                const rowIndex = data.rows.indexOf(row);
-
-                return (
+              {cards.map(({ row, rowIndex }) => (
                   <div key={`${group}-${rowIndex}`} className="votion-board-card">
                     <p className="votion-board-card-title">
                       {getCardTitle(data, row)}
@@ -373,8 +399,7 @@ const BoardView = ({
                       ))}
                     </div>
                   </div>
-                );
-              })}
+              ))}
             </div>
             {editable && (
               <button
@@ -388,6 +413,7 @@ const BoardView = ({
           </div>
         );
       })}
+      </div>
     </div>
   );
 };
@@ -404,6 +430,14 @@ export const VotionTable = createReactBlockSpec({
   render: ({ block, editor }) => {
     const data = normalizeTableData(block.props.data, emptyTable());
     const { isEditable } = editor as EditorWithUpdate;
+
+    if (data.columns.length === 0) {
+      return (
+        <div className="votion-table-root">
+          <p className="votion-board-empty">This table has no columns yet.</p>
+        </div>
+      );
+    }
 
     const updateData = (next: TableData) => {
       (editor as unknown as EditorWithUpdate).updateBlock(block, {

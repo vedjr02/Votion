@@ -14,6 +14,7 @@ export type TableData = {
   rows: Record<string, string>[];
   view: TableView;
   groupByColumnId?: string;
+  filterText?: string;
 };
 
 type LegacyTableData = {
@@ -121,6 +122,7 @@ export const normalizeTableData = (
       view: data.view ?? "table",
       groupByColumnId:
         data.groupByColumnId ?? selectColumn?.id ?? columns[0]?.id,
+      filterText: data.filterText ?? "",
     };
   }
 
@@ -148,6 +150,7 @@ export const normalizeTableData = (
       rows,
       view: statusColumn ? "board" : "table",
       groupByColumnId: statusColumn?.id ?? columns[0]?.id,
+      filterText: "",
     };
   }
 
@@ -179,3 +182,28 @@ export const getTableHeaders = (data: TableData) =>
 
 export const getTableRows = (data: TableData) =>
   data.rows.map((row) => data.columns.map((column) => row[column.id] ?? ""));
+
+export const filterTableRows = (data: TableData) => {
+  const query = data.filterText?.trim().toLowerCase();
+  if (!query) return data.rows;
+
+  return data.rows.filter((row) =>
+    data.columns.some((column) =>
+      (row[column.id] ?? "").toLowerCase().includes(query)
+    )
+  );
+};
+
+export const filterTableRowEntries = (data: TableData) => {
+  const query = data.filterText?.trim().toLowerCase();
+
+  return data.rows
+    .map((row, rowIndex) => ({ row, rowIndex }))
+    .filter(({ row }) =>
+      !query
+        ? true
+        : data.columns.some((column) =>
+            (row[column.id] ?? "").toLowerCase().includes(query)
+          )
+    );
+};

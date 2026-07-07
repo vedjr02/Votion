@@ -18,6 +18,7 @@ import {
   getCategoryLabel,
   serializeTemplateContent,
 } from "@/lib/templates";
+import { TemplatePreviewErrorBoundary } from "@/components/template-preview-error-boundary";
 
 const TemplatePreviewEditor = dynamic(
   () =>
@@ -85,7 +86,12 @@ export const TemplatePreviewDialog = ({
 
         <div className="flex-1 overflow-y-auto bg-muted/20 px-2 py-4 min-h-[420px]">
           <div className="mx-auto max-w-none rounded-lg border bg-background shadow-sm">
-            <TemplatePreviewEditor content={template.content} />
+            <TemplatePreviewErrorBoundary>
+              <TemplatePreviewEditor
+                key={template.id}
+                content={template.content}
+              />
+            </TemplatePreviewErrorBoundary>
           </div>
         </div>
 

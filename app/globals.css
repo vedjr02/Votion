@@ -514,7 +514,30 @@ body,
   accent-color: hsl(var(--foreground));
 }
 
+.votion-table-filter {
+  margin-bottom: 0.5rem;
+}
+
+.votion-table-filter input {
+  width: 100%;
+  max-width: 280px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.35rem;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 0.8rem;
+  padding: 0.35rem 0.55rem;
+}
+
+.votion-table-filter-board {
+  margin-bottom: 0.65rem;
+}
+
 .votion-board {
+  width: 100%;
+}
+
+.votion-board-columns {
   display: flex;
   gap: 0.75rem;
   overflow-x: auto;
