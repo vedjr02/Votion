@@ -1,11 +1,7 @@
 # Votion - Fullstack Notion Clone
 
-![Votion Logo](./public/logo.svg?theme=light)
-![Votion Logo](./public/logo-dark.svg?theme=dark)
 
 Votion is a Notion-style workspace built with Next.js, React, Convex, and Tailwind. Create, organize, and publish notes with real-time sync, rich editing, and authentication.
-
-**Maintained by:** [vedjr02](https://github.com/vedjr02)
 
 ## Key Features
 
@@ -69,14 +65,6 @@ npx convex dev
 npm run dev
 ```
 
-## Tech Stack
-
-- [Next.js](https://nextjs.org/)
-- [React](https://react.dev/)
-- [Convex](https://www.convex.dev/)
-- [Clerk](https://clerk.com/)
-- [Tailwind CSS](https://tailwindcss.com/)
-- [BlockNote](https://www.blocknotejs.org/)
 
 ## License
 
